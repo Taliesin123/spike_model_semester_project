@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import brentq        # used by overlap_B_theory
 #from scipy.optimize import brant
 
 
@@ -270,3 +271,127 @@ def top_eig_B(lam1, lam2, rho, rho_t, mu, n, k=-1):
         [Lam * m1 * s_m + lam2 * rho * rho_t,    lam2 * rho_t * s_r,  Lam * (1 - m1 ** 2) + lam2 * rho_t ** 2],
     ])
     return np.linalg.eigvalsh(B)[k]
+
+
+
+# ---------------------------------------------------------------- Method B: overlaps (report Section 10.3, proof in Appendix B.3)
+# x_B = kappa R_A(lam) x_hat, A = c I + W + sum_l theta_l v_l v_l^T, c = 2 mu / n - 1, kappa = Lam + 2 mu / n.
+# With S = S_W(lam - c) (Stieltjes transform of the semicircle), s_l = <v_l, x_hat>, q_il = <v_l, x_i>:
+#     norm:      kappa^2 sum_l s_l^2 S^2 / ((1 - S^2) (1 - theta_l S)^2) = 1,   S in (0, S_star), S_star = min(1, 1/theta_1)
+#     overlaps:  m_i^B = | kappa sum_l q_il s_l S / (1 - theta_l S) |
+#     lam = c + S + 1/S
+# Here written with g = -S (same formulas, g(z) = (-z + sqrt(z^2 - 4)) / 2).
+# used by heat_overlap_B and overlap_B_vs_lam1 in plot_maker_tali.py
+
+def g_semicircle(z):
+    """Stieltjes transform of the semicircle on [-2, 2], for real z > 2, with the sign convention g = -S_W. Value in (-1, 0)."""
+    return (-z + np.sqrt(z ** 2 - 4)) / 2
+
+
+def dg_semicircle(z):
+    """Derivative g'(z) = g^2 / (1 - g^2) (from g^2 + z g + 1 = 0)."""
+    g = g_semicircle(z)
+    return g ** 2 / (1 - g ** 2)
+
+
+def B_eig(lam1, lam2, rho, mu, n):
+    """Eigenvalues theta (ascending) and eigenvectors V (columns) of the 3x3 matrix B,
+    same B as top_eig_B with rho_t = 0, in the basis e1 = x1, e2 = (x2 - rho x1)/sqrt(1 - rho^2), e3 = x3."""
+    Lam = Lambda_theory(lam1, mu, n)
+    m1 = m1_theory(lam1)
+    s_m = np.sqrt(1 - m1 ** 2)
+    s_r = np.sqrt(max(0.0, 1 - rho ** 2))
+    B = np.array([
+        [Lam * m1 ** 2 + lam2 * rho ** 2, lam2 * rho * s_r, Lam * m1 * s_m],
+        [lam2 * rho * s_r,                lam2 * s_r ** 2,  0.0],
+        [Lam * m1 * s_m,                  0.0,              Lam * (1 - m1 ** 2)],
+    ])
+    theta, V = np.linalg.eigh(B)
+    return theta, V
+
+
+def overlap_B_theory(lam1, lam2, rho, mu, n):
+    """Theoretical m1^B = |<x_B, x1>|, m2^B = |<x_B, x2>| and Lagrange multiplier lam of Method B."""
+    Lam = Lambda_theory(lam1, mu, n)
+    m1 = m1_theory(lam1)
+    c = 2 * mu / n - 1
+    kappa = Lam + 2 * mu / n
+
+    theta, V = B_eig(lam1, lam2, rho, mu, n)
+
+    # x_hat, x1, x2 in the basis (e1, e2, e3), then in the eigenbasis of B
+    x_hat = np.array([m1, 0.0, np.sqrt(1 - m1 ** 2)])
+    x1 = np.array([1.0, 0.0, 0.0])
+    x2 = np.array([rho, np.sqrt(max(0.0, 1 - rho ** 2)), 0.0])
+    s = V.T @ x_hat
+    q1 = V.T @ x1
+    q2 = V.T @ x2
+
+    # right end of the spectrum of A - c I: bulk edge 2, or the top outlier theta + 1/theta
+    z_star = 2.0
+    for l in range(3):
+        if theta[l] > 1:
+            z_star = max(z_star, theta[l] + 1 / theta[l])
+
+    def Phi(z):
+        """||x_B||^2 / kappa^2. Only the l with s_l != 0 enter (the others have no pole)."""
+        g = g_semicircle(z)
+        dg = dg_semicircle(z)
+        total = 0.0
+        for l in range(3):
+            if abs(s[l]) > 1e-12:
+                total += s[l] ** 2 * dg / (1 + theta[l] * g) ** 2
+        return total
+
+    def regular_overlap(z, q):
+        """kappa sum_l q_l s_l g / (1 + theta_l g), over the l with s_l != 0."""
+        g = g_semicircle(z)
+        total = 0.0
+        for l in range(3):
+            if abs(s[l]) > 1e-12:
+                total += q[l] * s[l] * g / (1 + theta[l] * g)
+        return kappa * total
+
+    z_lo = z_star + 1e-10
+    if kappa ** 2 * Phi(z_lo) > 1:
+        # standard case: unique root of kappa^2 Phi(z) = 1 on (z_star, inf)
+        z_hi = z_star + 1.0
+        while kappa ** 2 * Phi(z_hi) > 1:
+            z_hi += 1.0
+        z = brentq(lambda zz: kappa ** 2 * Phi(zz) - 1, z_lo, z_hi)
+        mB1 = abs(regular_overlap(z, q1))
+        mB2 = abs(regular_overlap(z, q2))
+    else:
+        # case s_1 = 0 (report Eq. B_hard): x_hat has no component on the top outlier (e.g. lam1 <= 1, or rho = 0),
+        # the norm cannot reach 1 above z_star: lam sticks to the top outlier, and the missing norm
+        # tau^2 = 1 - kappa^2 Phi goes on the top eigenvector u_top, with <u_top, x_i> -> sqrt(1 - theta^-2) q_i,top.
+        # In these cases the regular part and the u_top part never overlap the same x_i, so we add the absolute values.
+        z = z_star
+        tau = np.sqrt(max(0.0, 1 - kappa ** 2 * Phi(z)))
+        top = np.argmax(theta)
+        ov = float(overlap_Y_P(theta[top]))      # sqrt(1 - 1/theta^2)
+        mB1 = abs(regular_overlap(z, q1)) + tau * ov * abs(q1[top])
+        mB2 = abs(regular_overlap(z, q2)) + tau * ov * abs(q2[top])
+
+    lam = c + z
+    return mB1, mB2, lam
+
+
+
+def overlap_A2_theory_report(lam1, lam2, rho, mu, n):
+    """Overlap m2^A of Method A with x2 (report Eq. 9.3), x_hat = top eigenvector of Y1.
+    Same Lam, theta_max, (c1, c2) as overlap_A_theory_report:
+        m2^A = |theta_max c2 / lam2| sqrt(1 - theta_max^-2)
+    for theta_max > 1, and 0 otherwise (overlap_Y_P)."""
+    Lam = Lambda_theory(lam1, mu, n)
+    m1 = m1_theory(lam1)
+    theta_max, theta_2 = eigval_P(Lam, lam2, m1 * rho)
+    if abs(theta_max - Lam) < 1e-12:      # m1 rho = 0 and Lam >= lam2: the top eigenvector of P is x_hat
+        c2 = 0.0
+    else:
+        r = m1 * rho * Lam / (theta_max - Lam)
+        N = np.sqrt(r ** 2 + 2 * m1 * rho * r + 1)
+        c2 = 1 / N
+    ov = float(overlap_Y_P(theta_max))    # sqrt(1 - 1/theta_max^2) if theta_max > 1, else 0
+    mA2 = abs(theta_max * c2 / lam2) * ov
+    return mA2

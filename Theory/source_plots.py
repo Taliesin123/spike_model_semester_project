@@ -2,6 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from class_twospike import TwoSpikes, cv_mu, mu_equilibrium
 import source_twospike as sts
+import class_twospike
+from class_twospike import solve_norm_constrained
+from scipy.optimize import brentq
+
+# solve_norm_constrained calls brentq, but class_twospike.py never imports it (NameError).
+# We do not touch class_twospike.py: we just give the module brentq from here.
+class_twospike.brentq = brentq
 # Functions used while plotting (simulations, sweeps), so that the plot_maker files stay lean.
 # Theory formulas are in source_twospike.py, the class and the method solvers in class_twospike.py.
 
@@ -450,3 +457,73 @@ def overlap_A_grid(lam1_values, rho_values, lam2, mu, n, reps, alpha=np.sqrt(0.5
                 list_o.append(sts.overlap(S.get_x1(), v))
             Z[i, j] = np.mean(list_o)
     return Z
+
+
+
+
+# ---------------------------------------------------------------- Method B: overlaps (report Section 10.3)
+# used by heat_overlap_B and overlap_B_vs_lam1 in plot_maker_tali.py
+
+def overlap_B_one_draw(n, lam1, lam2, rho, mu, alpha=np.sqrt(0.5)):
+    """One draw. x_B from solve_norm_constrained, with
+    A = Y2 - I + 2 mu F1(x_hat) (S.A) and b = 2 mu F1(x_hat) x_hat, x_hat = top eigenvector of Y1.
+    Returns |<x_B, x1>|, |<x_B, x2>|, lam."""
+    S = TwoSpikes(n, lam1, lam2, rho, mu=mu, alpha=alpha)
+    _, x_hat = S.top_eigenvector(S.Y1)
+    A = S.A(x_hat, mu)
+    b = 2 * mu * S.fisher_MS(x_hat, lam1) @ x_hat
+    x_B, lam = solve_norm_constrained(A, b)
+    return sts.overlap(S.get_x1(), x_B), sts.overlap(S.get_x2(), x_B), lam
+
+
+def overlap_B_grid(lam1_values, rho_values, lam2, mu, n, reps, which=1, alpha=np.sqrt(0.5)):
+    """Simulated m_which^B, mean over reps draws, shape (len(rho_values), len(lam1_values))."""
+    Z = np.zeros((len(rho_values), len(lam1_values)))
+    for i, rho in enumerate(rho_values):
+        for j, lam1 in enumerate(lam1_values):
+            list_o = []
+            for _ in range(reps):
+                o1, o2, _ = overlap_B_one_draw(n, lam1, lam2, rho, mu, alpha=alpha)
+                if which == 1:
+                    list_o.append(o1)
+                else:
+                    list_o.append(o2)
+            Z[i, j] = np.mean(list_o)
+    return Z
+
+
+
+# ---------------------------------------------------------------- heat map of m2^A = |<x2, x_hat_A>| in the (lam1, rho) plane (report Eq. 9.3)
+# used by heat_overlap_A2 in plot_maker_tali.py
+
+def overlap_A2_grid(lam1_values, rho_values, lam2, mu, n, reps, alpha=np.sqrt(0.5)):
+    """Same as overlap_A_grid, but simulated m2^A = |<x2, v>|, v = top eigenvector of A(x_hat).
+    Mean over reps draws per point, shape (len(rho_values), len(lam1_values))."""
+    Z = np.zeros((len(rho_values), len(lam1_values)))
+    for i, rho in enumerate(rho_values):
+        for j, lam1 in enumerate(lam1_values):
+            list_o = []
+            for _ in range(reps):
+                S = TwoSpikes(n, lam1, lam2, rho, mu=mu, alpha=alpha)
+                _, x_hat = S.top_eigenvector(S.Y1)
+                _, v = S.top_eigenvector(S.A(x_hat, mu))
+                list_o.append(sts.overlap(S.get_x2(), v))
+            Z[i, j] = np.mean(list_o)
+    return Z
+
+
+
+# ---------------------------------------------------------------- Method A: overlaps with x1 and x2 (same as sample_overlaps, for Method A)
+# used by phase_method_A in plot_maker_tali.py
+
+def sample_overlaps_A(n, lam1, lam2, rho, mu, reps, alpha=np.sqrt(0.5)):
+    """Mean over reps of (|<v,x1>|, |<v,x2>|), v = top eigenvector of A(x_hat) = Y2 - I + 2 mu F1(x_hat),
+    x_hat = top eigenvector of Y1 (Method A)."""
+    o = np.zeros(2)
+    for _ in range(reps):
+        S = TwoSpikes(n, lam1, lam2, rho, mu=mu, alpha=alpha)
+        _, x_hat = S.top_eigenvector(S.Y1)
+        _, v = S.top_eigenvector(S.A(x_hat, mu))
+        o[0] += sts.overlap(S.get_x1(), v)
+        o[1] += sts.overlap(S.get_x2(), v)
+    return o / reps

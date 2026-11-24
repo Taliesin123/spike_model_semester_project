@@ -548,26 +548,27 @@ def phase_A(rho=0.3, mu=0.5, n=1000, tol=None):
     colors = ["red", "blue", "green"]             # 0, 1, 2 outliers
     cmap = mpl_colors.ListedColormap(colors)
 
-    plt.figure(figsize=(6.5, 5.5))
+    plt.figure(figsize=(10, 7.5))
     plt.pcolormesh(lam1_values, lam2_values, Z, cmap=cmap, vmin=-0.5, vmax=2.5, shading="nearest", alpha=0.4)
-    plt.plot(lam1_fine, f01, color="k", lw=2, ls="--")
-    plt.plot(lam1_fine, f12, color="k", lw=2)
-    plt.contour(lam1_values, lam2_values, Theta, levels=[1], colors="magenta", linewidths=2, linestyles=":")
-    plt.contour(lam1_values, lam2_values, Theta2, levels=[1], colors="orange", linewidths=2, linestyles=":")
+    plt.plot(lam1_fine, f01, color="green", lw=4)
+    plt.plot(lam1_fine, f12, color="k", lw=4)
+    plt.contour(lam1_values, lam2_values, Theta, levels=[1], colors="magenta", linewidths=4, linestyles=":")
+    plt.contour(lam1_values, lam2_values, Theta2, levels=[1], colors="orange", linewidths=4, linestyles=":")
     plt.xlim(lam1_values[0], lam1_values[-1])
     plt.ylim(lam2_values[0], lam2_values[-1])
-    plt.xlabel(r"$\lambda_1$")
-    plt.ylabel(r"$\lambda_2$")
+    plt.xlabel(r"$\lambda_1$", fontsize=20)
+    plt.ylabel(r"$\lambda_2$", fontsize=20)
+    plt.tick_params(labelsize=20)
     plt.title(rf"Number of outliers of $A(\hat x) = Y_2 - I + 2\mu F_1(\hat x)$" + "\n"
-              + rf"$\rho$={rho}, $\mu$={mu}, $n$={n}, one draw per point, tol={tol:.3f}", fontsize=10)
+              + rf"$\rho$={rho}, $\mu$={mu}, $n$={n}, one draw per point, tol={tol:.3f}", fontsize=20)
     plt.legend(handles=[mpatches.Patch(color=colors[0], alpha=0.4, label="0 outlier (simulation)"),
                         mpatches.Patch(color=colors[1], alpha=0.4, label="1 outlier (simulation)"),
                         mpatches.Patch(color=colors[2], alpha=0.4, label="2 outliers (simulation)"),
-                        plt.Line2D([], [], color="k", ls="--", lw=2, label=r"theory $f_{01}(\lambda_1)$"),
-                        plt.Line2D([], [], color="k", lw=2, label=r"theory $f_{12}(\lambda_1)$"),
-                        plt.Line2D([], [], color="magenta", ls=":", lw=2, label=r"$\theta_{\max}(B) = 1$, measured $\tilde\rho$"),
-                        plt.Line2D([], [], color="orange", ls=":", lw=2, label=r"$\theta_2(B) = 1$, measured $\tilde\rho$")],
-               loc="upper left", fontsize=8, framealpha=0.8)
+                        plt.Line2D([], [], color="green", lw=4, label=r"theory $f_{01}(\lambda_1)$"),
+                        plt.Line2D([], [], color="k", lw=4, label=r"theory $f_{12}(\lambda_1)$"),
+                        plt.Line2D([], [], color="magenta", ls=":", lw=4, label=r"$\theta_{\max}(B) = 1$, measured $\tilde\rho$"),
+                        plt.Line2D([], [], color="orange", ls=":", lw=4, label=r"$\theta_2(B) = 1$, measured $\tilde\rho$")],
+               loc="upper left", fontsize=16, framealpha=0.8)
     plt.tight_layout()
     plt.savefig(os.path.join(DIR_PLOTS, f"phase_A_rho={rho}.png"), dpi=120)
     plt.close()
@@ -646,6 +647,151 @@ def heat_overlap_A(lam2=3.0, mu=0.5, n=500, reps=5, levels=(0.2, 0.4, 0.6, 0.8, 
 
 
 
+# ---------------------------------------------------------------- heat map of m2^A in the (lam1, rho) plane (report Eq. 9.3)
+# Same plot as heat_overlap_A, for m2^A.
+# Grid: simulated m2^A = |<x2, top eigenvector of A(x_hat)>| (sp.overlap_A2_grid).
+# Red: level lines of the theory m2^A of Eq. 9.3 (sts.overlap_A2_theory_report).
+
+def heat_overlap_A2(lam2=3.0, mu=0.5, n=500, reps=5, levels=(0.2, 0.4, 0.6, 0.8, 0.95)):
+    lam1_values = np.linspace(0.5, 4, 30)
+    rho_values = np.linspace(0, 1, 30)
+    lam1_fine = np.linspace(0.5, 4, 300)          # for the theory
+    rho_fine = np.linspace(0, 1, 300)
+
+    Z = sp.overlap_A2_grid(lam1_values, rho_values, lam2, mu, n, reps, alpha=ALPHA)
+
+    theory = np.zeros((len(rho_fine), len(lam1_fine)))
+    for i, rho in enumerate(rho_fine):
+        for j, lam1 in enumerate(lam1_fine):
+            theory[i, j] = sts.overlap_A2_theory_report(lam1, lam2, rho, mu, n)
+
+    plt.figure(figsize=(7, 5.5))
+    plt.pcolormesh(lam1_values, rho_values, Z, cmap="Greys", vmin=0, vmax=1, shading="nearest")
+    plt.colorbar(label=r"$m_2^A$ (simulation)")
+    cs = plt.contour(lam1_fine, rho_fine, theory, levels=list(levels), colors="red", linewidths=1.5)
+    plt.clabel(cs, fontsize=8)
+    plt.plot([], [], color="red", lw=1.5, label=r"theory $m_2^A$ (Eq. 9.3)")     # legend entry for the contour
+    plt.xlabel(r"$\lambda_1$")
+    plt.ylabel(r"$\rho$")
+    plt.title(rf"$m_2^A = |\langle \hat x_A^{{(2)}}, x_2\rangle|$" + "\n"
+              + rf"$\lambda_2$={lam2}, $\mu$={mu}, $n$={n}, {reps} draws per point", fontsize=10)
+    plt.legend(loc="upper right", fontsize=8)
+    plt.tight_layout()
+    plt.savefig(os.path.join(DIR_PLOTS, f"heat_overlap_A2_lam2={lam2}_mu={mu}_n={n}.png"), dpi=120)
+    plt.close()
+
+
+
+# ---------------------------------------------------------------- Method B: overlaps (report Section 10.3)
+# Points / grid: simulation (sp.overlap_B_one_draw, sp.overlap_B_grid). Red: theory (sts.overlap_B_theory).
+
+def heat_overlap_B(lam2=3.0, mu=0.5, n=300, reps=5, which=1, levels=(0.2, 0.4, 0.6, 0.8, 0.95)):
+    """Same plot as heat_overlap_A, for Method B. Grid: simulated m_which^B. Red: level lines of the theory."""
+    lam1_values = np.linspace(0.5, 4, 30)
+    rho_values = np.linspace(0, 1, 30)
+    lam1_fine = np.linspace(0.5, 4, 300)          # for the theory
+    rho_fine = np.linspace(0, 1, 300)
+
+    Z = sp.overlap_B_grid(lam1_values, rho_values, lam2, mu, n, reps, which=which, alpha=ALPHA)
+
+    theory = np.zeros((len(rho_fine), len(lam1_fine)))
+    for i, rho in enumerate(rho_fine):
+        for j, lam1 in enumerate(lam1_fine):
+            mB1, mB2, _ = sts.overlap_B_theory(lam1, lam2, rho, mu, n)
+            if which == 1:
+                theory[i, j] = mB1
+            else:
+                theory[i, j] = mB2
+
+    plt.figure(figsize=(7, 5.5))
+    plt.pcolormesh(lam1_values, rho_values, Z, cmap="Greys", vmin=0, vmax=1, shading="nearest")
+    plt.colorbar(label=rf"$m_{which}^B$ (simulation)")
+    cs = plt.contour(lam1_fine, rho_fine, theory, levels=list(levels), colors="red", linewidths=1.5)
+    plt.clabel(cs, fontsize=8)
+    plt.plot([], [], color="red", lw=1.5, label=rf"theory $m_{which}^B$ (Section 10.3)")
+    plt.xlabel(r"$\lambda_1$")
+    plt.ylabel(r"$\rho$")
+    plt.title(rf"$m_{which}^B = |\langle \hat x_B^{{(2)}}, x_{which}\rangle|$" + "\n"
+              + rf"$\lambda_2$={lam2}, $\mu$={mu}, $n$={n}, {reps} draws per point", fontsize=10)
+    plt.legend(loc="upper right", fontsize=8)
+    plt.tight_layout()
+    plt.savefig(os.path.join(DIR_PLOTS, f"heat_overlap_B{which}_lam2={lam2}_mu={mu}_n={n}.png"), dpi=120)
+    # no plt.close(): the figure stays open and is shown by plt.show() at the end
+
+
+def overlap_B_vs_lam1(n=300, lam2=3.0, mu=0.5, rho=0.5, sims=20):
+    """Same plot as overlap_x1_vs_lam1, for Method B.
+    Points: simulated m1^B and m2^B (mean +- standard error). Red: theory."""
+    lam1_values = np.linspace(0, 4, 21)
+
+    mean_1, err_1 = [], []
+    mean_2, err_2 = [], []
+
+    for lam1 in lam1_values:
+        list_1, list_2 = [], []
+        for s in range(sims):
+            o1, o2, _ = sp.overlap_B_one_draw(n, lam1, lam2, rho, mu, alpha=ALPHA)
+            list_1.append(o1)
+            list_2.append(o2)
+        mean_1.append(np.mean(list_1))
+        err_1.append(np.std(list_1) / np.sqrt(sims))
+        mean_2.append(np.mean(list_2))
+        err_2.append(np.std(list_2) / np.sqrt(sims))
+
+    lam1_fine = np.linspace(0, 4, 300)
+    theory_1 = []
+    theory_2 = []
+    for lam1 in lam1_fine:
+        mB1, mB2, _ = sts.overlap_B_theory(lam1, lam2, rho, mu, n)
+        theory_1.append(mB1)
+        theory_2.append(mB2)
+
+    plt.figure(figsize=(7, 4.8))
+    plt.errorbar(lam1_values, mean_1, err_1, color="C0", marker="o", ms=5, ls="none", capsize=2, label=r"$m_1^B = |\langle x_1, \hat x_B\rangle|$ (simulation)")
+    plt.errorbar(lam1_values, mean_2, err_2, color="C2", marker="s", ms=5, ls="none", capsize=2, label=r"$m_2^B = |\langle x_2, \hat x_B\rangle|$ (simulation)")
+    plt.plot(lam1_fine, theory_1, color="red", ls="-", label=r"theory $m_1^B$")
+    plt.plot(lam1_fine, theory_2, color="red", ls="--", label=r"theory $m_2^B$")
+    plt.axvline(1, color="k", ls=":", label=r"BBP threshold $\lambda_1=1$")
+    plt.xlabel(r"$\lambda_1$")
+    plt.ylabel("overlap")
+    plt.title(rf"Method B: $\rho$={rho}, $n$={n}, $\lambda_2$={lam2}, $\mu$={mu}, {sims} sims", fontsize=10)
+    plt.grid()
+    plt.legend(fontsize=8)
+    plt.tight_layout()
+    plt.savefig(os.path.join(DIR_PLOTS, f"overlap_B_vs_lam1_rho={rho}_n={n}.png"), dpi=120)
+    # no plt.close(): the figure stays open and is shown by plt.show() at the end
+
+
+
+
+# ---------------------------------------------------------------- same plot as fig_phase, for Method A, at a fixed rho
+# Colour: red = |<v, x1>|, green = |<v, x2>| (v = top eigenvector of A(x_hat), sp.sample_overlaps_A), yellow = both.
+# White dashed: BBP lam1 = 1 (x_hat informative), lam2 = 1.
+# Red curve: theory f_01 (sts.f_01), where the top eigenvalue of A leaves the bulk (the analogue of theta_+ = 1).
+
+def phase_method_A(rho=0.3, mu=0.5, n=300, reps=1, omax=0.7):
+    grid = np.linspace(0.1, 3, 75)
+    Z = np.array([[sp.sample_overlaps_A(n, lam1, lam2, rho, mu, reps, ALPHA) for lam1 in grid] for lam2 in grid])  # (lam2, lam1, 2)
+    rgb = np.zeros((*Z.shape[:2], 3)); rgb[..., :2] = np.clip(Z / omax, 0, 1)
+    lam1_fine = np.linspace(0.1, 3, 500)
+    f01 = []
+    for lam1 in lam1_fine:
+        f01.append(sts.f_01(lam1, rho, mu, n))
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.imshow(rgb, origin="lower", extent=[grid[0], grid[-1], grid[0], grid[-1]], aspect="auto")
+    ax.axvline(1, color="white", ls="--", lw=1); ax.axhline(1, color="white", ls="--", lw=1)
+    ax.plot(lam1_fine, f01, color="red", lw=2)
+    ax.set_xlim(grid[0], grid[-1]); ax.set_ylim(grid[0], grid[-1])
+    ax.set_xlabel(r"$\lambda_1$"); ax.set_ylabel(r"$\lambda_2$"); ax.set_title(f"Method A: rho={rho}, mu={mu}, n={n}")
+    ax.legend(handles=[mpatches.Patch(color="k", label="none"), mpatches.Patch(color="r", label=r"$x_1$ only"),
+                       mpatches.Patch(color=(0, 1, 0), label=r"$x_2$ only"), mpatches.Patch(color="y", label="both"),
+                       plt.Line2D([], [], color="white", ls="--", label=r"BBP $\lambda_1=1$, $\lambda_2=1$"),
+                       plt.Line2D([], [], color="red", label=r"theory $f_{01}(\lambda_1)$")],
+              loc="upper left", fontsize=7, framealpha=0.6)
+    fig.tight_layout(); fig.savefig(os.path.join(DIR_PLOTS, f"phase_method_A_rho={rho}.png"), dpi=120); plt.close(fig)
+
+
+
 if __name__ == "__main__":
     todo = sys.argv[1:] or ["eig", "lam", "heat", "phase", "top_eigen_a_rho", "top_eigen_a_lam1", "bulk_A", "overlap_n", "overlap_rho", "overlap_lam1",
                              "overlap_xhat_n", "overlap_xhat_rho", "overlap_xhat_lam1", "phase_A", "phase_A_2"]
@@ -665,4 +811,9 @@ if __name__ == "__main__":
     if "phase_A" in todo: phase_A()
     if "top_eig_A_old_vs_new" in todo: top_eig_A_old_vs_new()
     if "heat_overlap_A" in todo: heat_overlap_A()
+    if "heat_overlap_A2" in todo: heat_overlap_A2()
+    if "heat_B1" in todo: heat_overlap_B(which=1)
+    if "heat_B2" in todo: heat_overlap_B(which=2)
+    if "B_lam1" in todo: overlap_B_vs_lam1()
+    if "phase_method_A" in todo: phase_method_A()
     plt.show()
