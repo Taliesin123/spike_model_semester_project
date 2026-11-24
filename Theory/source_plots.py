@@ -527,3 +527,34 @@ def sample_overlaps_A(n, lam1, lam2, rho, mu, reps, alpha=np.sqrt(0.5)):
         o[0] += sts.overlap(S.get_x1(), v)
         o[1] += sts.overlap(S.get_x2(), v)
     return o / reps
+
+
+
+# ---------------------------------------------------------------- Method B: overlaps with x1 and x2 (same as sample_overlaps_A, for Method B)
+# used by phase_method_B in plot_maker_tali.py
+
+def sample_overlaps_B(n, lam1, lam2, rho, mu, reps, alpha=np.sqrt(0.5)):
+    """Mean over reps of (|<x_B,x1>|, |<x_B,x2>|), x_B from overlap_B_one_draw (Method B)."""
+    o = np.zeros(2)
+    for _ in range(reps):
+        o1, o2, _ = overlap_B_one_draw(n, lam1, lam2, rho, mu, alpha=alpha)
+        o[0] += o1
+        o[1] += o2
+    return o / reps
+
+
+
+# ---------------------------------------------------------------- heat maps of m1, m2 of the naive method in the (lam1, rho) plane (report Eq. 5.3)
+# used by heat_overlap_naive in plot_maker_tali.py
+
+def overlap_naive_grid(lam1_values, rho_values, lam2, n, reps, alpha=np.sqrt(0.5)):
+    """Simulated m1 = |<x1, x_naive>| and m2 = |<x2, x_naive>|, x_naive = top eigenvector of Y (sample_overlaps).
+    Mean over reps draws per point, two arrays of shape (len(rho_values), len(lam1_values))."""
+    Z1 = np.zeros((len(rho_values), len(lam1_values)))
+    Z2 = np.zeros((len(rho_values), len(lam1_values)))
+    b = np.sqrt(1 - alpha ** 2) * lam2
+    for i, rho in enumerate(rho_values):
+        for j, lam1 in enumerate(lam1_values):
+            a = alpha * lam1
+            Z1[i, j], Z2[i, j] = sample_overlaps(n, a, b, rho, reps, alpha)
+    return Z1, Z2

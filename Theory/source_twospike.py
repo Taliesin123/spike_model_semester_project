@@ -395,3 +395,28 @@ def overlap_A2_theory_report(lam1, lam2, rho, mu, n):
     ov = float(overlap_Y_P(theta_max))    # sqrt(1 - 1/theta_max^2) if theta_max > 1, else 0
     mA2 = abs(theta_max * c2 / lam2) * ov
     return mA2
+
+
+
+def overlap_naive_theory_report(lam1, lam2, rho, alpha=np.sqrt(0.5)):
+    """Overlaps of the naive estimator (top eigenvector of Y = alpha Y1 + sqrt(1 - alpha^2) Y2) with x1, x2 (report Eq. 5.3).
+    a = alpha lam1, b = sqrt(1 - alpha^2) lam2, theta_+ = eigval_P(a, b, rho) (Eq. 5.2),
+    (c1, c2) = (r, 1) / sqrt(r^2 + 2 rho r + 1), r = rho a / (theta_+ - a):
+        m1 = |theta_+ c1 / a| sqrt(1 - theta_+^-2)
+        m2 = |theta_+ c2 / b| sqrt(1 - theta_+^-2)
+    for theta_+ > 1, and 0 otherwise (overlap_Y_P)."""
+    a = alpha * lam1
+    b = np.sqrt(1 - alpha ** 2) * lam2
+    theta_p, theta_m = eigval_P(a, b, rho)
+    if abs(theta_p - a) < 1e-12:          # rho = 0 and a >= b: the top eigenvector of P is x1
+        c1 = 1.0
+        c2 = 0.0
+    else:
+        r = rho * a / (theta_p - a)
+        N = np.sqrt(r ** 2 + 2 * rho * r + 1)
+        c1 = r / N
+        c2 = 1 / N
+    ov = float(overlap_Y_P(theta_p))      # sqrt(1 - 1/theta_+^2) if theta_+ > 1, else 0
+    m1 = abs(theta_p * c1 / a) * ov
+    m2 = abs(theta_p * c2 / b) * ov
+    return m1, m2

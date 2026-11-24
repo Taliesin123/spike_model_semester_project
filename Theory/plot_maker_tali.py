@@ -682,6 +682,42 @@ def heat_overlap_A2(lam2=3.0, mu=0.5, n=500, reps=5, levels=(0.2, 0.4, 0.6, 0.8,
 
 
 
+# ---------------------------------------------------------------- heat maps of m1, m2 of the naive method in the (lam1, rho) plane (report Eq. 5.3)
+# Same plots as heat_overlap_A and heat_overlap_A2, for the naive method. One simulation, two figures.
+# Grid: simulated m1, m2 (sp.overlap_naive_grid). Red: level lines of the theory of Eq. 5.3 (sts.overlap_naive_theory_report).
+
+def heat_overlap_naive(lam2=3.0, n=500, reps=5, levels=(0.2, 0.4, 0.6, 0.8, 0.95)):
+    lam1_values = np.linspace(0.5, 4, 30)
+    rho_values = np.linspace(0, 1, 30)
+    lam1_fine = np.linspace(0.5, 4, 300)          # for the theory
+    rho_fine = np.linspace(0, 1, 300)
+
+    Z1, Z2 = sp.overlap_naive_grid(lam1_values, rho_values, lam2, n, reps, alpha=ALPHA)
+
+    theory1 = np.zeros((len(rho_fine), len(lam1_fine)))
+    theory2 = np.zeros((len(rho_fine), len(lam1_fine)))
+    for i, rho in enumerate(rho_fine):
+        for j, lam1 in enumerate(lam1_fine):
+            theory1[i, j], theory2[i, j] = sts.overlap_naive_theory_report(lam1, lam2, rho, alpha=ALPHA)
+
+    for k, Z, theory in [(1, Z1, theory1), (2, Z2, theory2)]:
+        plt.figure(figsize=(7, 5.5))
+        plt.pcolormesh(lam1_values, rho_values, Z, cmap="Greys", vmin=0, vmax=1, shading="nearest")
+        plt.colorbar(label=rf"$m_{k}$ (simulation)")
+        cs = plt.contour(lam1_fine, rho_fine, theory, levels=list(levels), colors="red", linewidths=1.5)
+        plt.clabel(cs, fontsize=8)
+        plt.plot([], [], color="red", lw=1.5, label=rf"theory $m_{k}$ (Eq. 5.3)")     # legend entry for the contour
+        plt.xlabel(r"$\lambda_1$")
+        plt.ylabel(r"$\rho$")
+        plt.title(rf"Naive: $m_{k} = |\langle \hat x_{{naive}}, x_{k}\rangle|$" + "\n"
+                  + rf"$\lambda_2$={lam2}, $\alpha$={ALPHA:.3f}, $n$={n}, {reps} draws per point", fontsize=10)
+        plt.legend(loc="upper right", fontsize=8)
+        plt.tight_layout()
+        plt.savefig(os.path.join(DIR_PLOTS, f"heat_overlap_naive{k}_lam2={lam2}_n={n}.png"), dpi=120)
+        plt.close()
+
+
+
 # ---------------------------------------------------------------- Method B: overlaps (report Section 10.3)
 # Points / grid: simulation (sp.overlap_B_one_draw, sp.overlap_B_grid). Red: theory (sts.overlap_B_theory).
 
@@ -766,10 +802,10 @@ def overlap_B_vs_lam1(n=300, lam2=3.0, mu=0.5, rho=0.5, sims=20):
 
 # ---------------------------------------------------------------- same plot as fig_phase, for Method A, at a fixed rho
 # Colour: red = |<v, x1>|, green = |<v, x2>| (v = top eigenvector of A(x_hat), sp.sample_overlaps_A), yellow = both.
-# White dashed: BBP lam1 = 1 (x_hat informative), lam2 = 1.
+
 # Red curve: theory f_01 (sts.f_01), where the top eigenvalue of A leaves the bulk (the analogue of theta_+ = 1).
 
-def phase_method_A(rho=0.3, mu=0.5, n=300, reps=1, omax=0.7):
+def phase_method_A(rho=0.3, mu=0.5, n=500, reps=3, omax=0.7):
     grid = np.linspace(0.1, 3, 75)
     Z = np.array([[sp.sample_overlaps_A(n, lam1, lam2, rho, mu, reps, ALPHA) for lam1 in grid] for lam2 in grid])  # (lam2, lam1, 2)
     rgb = np.zeros((*Z.shape[:2], 3)); rgb[..., :2] = np.clip(Z / omax, 0, 1)
@@ -779,16 +815,33 @@ def phase_method_A(rho=0.3, mu=0.5, n=300, reps=1, omax=0.7):
         f01.append(sts.f_01(lam1, rho, mu, n))
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.imshow(rgb, origin="lower", extent=[grid[0], grid[-1], grid[0], grid[-1]], aspect="auto")
-    ax.axvline(1, color="white", ls="--", lw=1); ax.axhline(1, color="white", ls="--", lw=1)
     ax.plot(lam1_fine, f01, color="red", lw=2)
     ax.set_xlim(grid[0], grid[-1]); ax.set_ylim(grid[0], grid[-1])
     ax.set_xlabel(r"$\lambda_1$"); ax.set_ylabel(r"$\lambda_2$"); ax.set_title(f"Method A: rho={rho}, mu={mu}, n={n}")
     ax.legend(handles=[mpatches.Patch(color="k", label="none"), mpatches.Patch(color="r", label=r"$x_1$ only"),
                        mpatches.Patch(color=(0, 1, 0), label=r"$x_2$ only"), mpatches.Patch(color="y", label="both"),
-                       plt.Line2D([], [], color="white", ls="--", label=r"BBP $\lambda_1=1$, $\lambda_2=1$"),
                        plt.Line2D([], [], color="red", label=r"theory $f_{01}(\lambda_1)$")],
               loc="upper left", fontsize=7, framealpha=0.6)
-    fig.tight_layout(); fig.savefig(os.path.join(DIR_PLOTS, f"phase_method_A_rho={rho}.png"), dpi=120); plt.close(fig)
+    fig.tight_layout(); fig.savefig(os.path.join(DIR_PLOTS, f"phase_method_A_rho={rho}_n={n}_reps={reps}.png"), dpi=120); plt.close(fig)
+
+
+
+# ---------------------------------------------------------------- same plot as fig_phase, for Method B, at a fixed rho
+# Colour: red = |<x_B, x1>|, green = |<x_B, x2>| (x_B = Method B estimator, sp.sample_overlaps_B), yellow = both.
+
+
+def phase_method_B(rho=0.3, mu=0.5, n=500, reps=3, omax=0.7):
+    grid = np.linspace(0.1, 3, 75)
+    Z = np.array([[sp.sample_overlaps_B(n, lam1, lam2, rho, mu, reps, ALPHA) for lam1 in grid] for lam2 in grid])  # (lam2, lam1, 2)
+    rgb = np.zeros((*Z.shape[:2], 3)); rgb[..., :2] = np.clip(Z / omax, 0, 1)
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.imshow(rgb, origin="lower", extent=[grid[0], grid[-1], grid[0], grid[-1]], aspect="auto")
+    ax.set_xlim(grid[0], grid[-1]); ax.set_ylim(grid[0], grid[-1])
+    ax.set_xlabel(r"$\lambda_1$"); ax.set_ylabel(r"$\lambda_2$"); ax.set_title(f"Method B: rho={rho}, mu={mu}, n={n}")
+    ax.legend(handles=[mpatches.Patch(color="k", label="none"), mpatches.Patch(color="r", label=r"$x_1$ only"),
+                       mpatches.Patch(color=(0, 1, 0), label=r"$x_2$ only"), mpatches.Patch(color="y", label="both")],
+              loc="upper left", fontsize=7, framealpha=0.6)
+    fig.tight_layout(); fig.savefig(os.path.join(DIR_PLOTS, f"phase_method_B_rho={rho}_n={n}_reps={reps}.png"), dpi=120); plt.close(fig)
 
 
 
@@ -812,8 +865,10 @@ if __name__ == "__main__":
     if "top_eig_A_old_vs_new" in todo: top_eig_A_old_vs_new()
     if "heat_overlap_A" in todo: heat_overlap_A()
     if "heat_overlap_A2" in todo: heat_overlap_A2()
+    if "heat_naive" in todo: heat_overlap_naive()
     if "heat_B1" in todo: heat_overlap_B(which=1)
     if "heat_B2" in todo: heat_overlap_B(which=2)
     if "B_lam1" in todo: overlap_B_vs_lam1()
     if "phase_method_A" in todo: phase_method_A()
+    if "phase_method_B" in todo: phase_method_B()
     plt.show()
