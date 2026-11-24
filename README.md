@@ -9,4 +9,6 @@ Authors: Taliesin Perez, Celia Budelot.
 
 #### Repository layout
 
-Everything is everywhere. Good luck.
+first_semester contains everything from the first semester of 2026, a mess.
+
+Thoery contains all the code from this semester. It is organised.
