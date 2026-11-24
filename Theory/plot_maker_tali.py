@@ -3,6 +3,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.colors as mpl_colors
 import source_twospike as sts       # theory
 import source_plots as sp           # functions used to make the plots (simulations)
 # The TwoSpikes class is in class_twospike.py
@@ -525,9 +526,129 @@ def bulk_A(n=2000, lam1=2.0, lam2=3.0, mu=0.5, rho=0.5):
 
 
 
+# PHASE DIAGRAM OF A(x_hat) = Y2 - I + 2 mu F1(x_hat) IN THE (lam1, lam2) PLANE (report, section 8.4)
+# Grid: simulated number of outliers of A (sp.n_outliers_grid), red = 0, blue = 1, green = 2.
+# Curves: theoretical boundaries f_01 (0 <-> 1 outlier) and f_12 (1 <-> 2 outliers), from p(1) = 0.
+
+def phase_A(rho=0.3, mu=0.5, n=1000, tol=None):
+    if tol is None:
+        tol = 3 * n ** (-2 / 3)                    # margin above the bulk edge to count an outlier
+    lam1_values = np.linspace(0.05, 4, 50)        # 50 x 50 simulation grid
+    lam2_values = np.linspace(0.05, 4, 50)
+    lam1_fine = np.linspace(0.05, 4, 500)         # for the theoretical curves
+
+    Z, Theta, Theta2 = sp.n_outliers_grid(lam1_values, lam2_values, rho, mu, n, tol, alpha=ALPHA)
+
+    f01 = []
+    f12 = []
+    for lam1 in lam1_fine:
+        f01.append(sts.f_01(lam1, rho, mu, n))
+        f12.append(sts.f_12(lam1, rho, mu, n))
+
+    colors = ["red", "blue", "green"]             # 0, 1, 2 outliers
+    cmap = mpl_colors.ListedColormap(colors)
+
+    plt.figure(figsize=(6.5, 5.5))
+    plt.pcolormesh(lam1_values, lam2_values, Z, cmap=cmap, vmin=-0.5, vmax=2.5, shading="nearest", alpha=0.4)
+    plt.plot(lam1_fine, f01, color="k", lw=2, ls="--")
+    plt.plot(lam1_fine, f12, color="k", lw=2)
+    plt.contour(lam1_values, lam2_values, Theta, levels=[1], colors="magenta", linewidths=2, linestyles=":")
+    plt.contour(lam1_values, lam2_values, Theta2, levels=[1], colors="orange", linewidths=2, linestyles=":")
+    plt.xlim(lam1_values[0], lam1_values[-1])
+    plt.ylim(lam2_values[0], lam2_values[-1])
+    plt.xlabel(r"$\lambda_1$")
+    plt.ylabel(r"$\lambda_2$")
+    plt.title(rf"Number of outliers of $A(\hat x) = Y_2 - I + 2\mu F_1(\hat x)$" + "\n"
+              + rf"$\rho$={rho}, $\mu$={mu}, $n$={n}, one draw per point, tol={tol:.3f}", fontsize=10)
+    plt.legend(handles=[mpatches.Patch(color=colors[0], alpha=0.4, label="0 outlier (simulation)"),
+                        mpatches.Patch(color=colors[1], alpha=0.4, label="1 outlier (simulation)"),
+                        mpatches.Patch(color=colors[2], alpha=0.4, label="2 outliers (simulation)"),
+                        plt.Line2D([], [], color="k", ls="--", lw=2, label=r"theory $f_{01}(\lambda_1)$"),
+                        plt.Line2D([], [], color="k", lw=2, label=r"theory $f_{12}(\lambda_1)$"),
+                        plt.Line2D([], [], color="magenta", ls=":", lw=2, label=r"$\theta_{\max}(B) = 1$, measured $\tilde\rho$"),
+                        plt.Line2D([], [], color="orange", ls=":", lw=2, label=r"$\theta_2(B) = 1$, measured $\tilde\rho$")],
+               loc="upper left", fontsize=8, framealpha=0.8)
+    plt.tight_layout()
+    plt.savefig(os.path.join(DIR_PLOTS, f"phase_A_rho={rho}.png"), dpi=120)
+    plt.close()
+
+
+
+
+
+# ---------------------------------------------------------------- top eigenvalue of A: old (code) vs simplified (report Eq. 9.2)
+def top_eig_A_old_vs_new(lam1=2.0, lam2=3.0, rho=0.5, mu=0.5, n_max=10000):
+    """Theory only.
+    New: sts.top_eig_A_theory_report (report Eq. 9.2, rho_tilde -> 0).
+    Full: sts.top_eig_A_theory_finite_n (full beta of Appendix B.2, rho_tilde = sqrt((1 - rho^2)/n)).
+    n -> inf: sts.top_eig_A_theory (old code, no 1/n terms, independent of n).
+    """
+    n_values = np.arange(10, n_max + 1)
+
+    old = []
+    new = []
+    full = []
+    for n in n_values:
+        old.append(sts.top_eig_A_theory(lam1, lam2, rho, mu))
+        new.append(sts.top_eig_A_theory_report(lam1, lam2, rho, mu, n))
+        full.append(sts.top_eig_A_theory_finite_n(lam1, lam2, rho, mu, n))
+    old = np.array(old)
+    new = np.array(new)
+    full = np.array(full)
+    fig, ax = plt.subplots(figsize=(6.5, 4.5))
+
+    ax.plot(n_values, full, "C3", label=r"full $\beta$ (App. B.2), $\tilde\rho = \sqrt{(1-\rho^2)/n}$")
+    ax.plot(n_values, new, "C0", label=r"report Eq. 9.2 ($\tilde\rho \to 0$)")
+    ax.plot(n_values, old, "k--", label=r"$n \to \infty$ (no $1/n$ terms)")
+    ax.set_xscale("log")
+    ax.set_xlabel(r"$n$")
+    ax.set_ylabel(r"$\lambda_{\max}(A)$")
+    ax.legend(fontsize=8)
+
+    fig.suptitle(rf"Top eigenvalue of $A$: $\lambda_1$={lam1}, $\lambda_2$={lam2}, $\rho$={rho}, $\mu$={mu}", fontsize=10)
+    plt.tight_layout()
+    plt.savefig(os.path.join(DIR_PLOTS, f"top_eig_A_old_vs_new_lam1={lam1}_lam2={lam2}_rho={rho}_mu={mu}.png"), dpi=120)
+    plt.close()
+
+
+
+# ---------------------------------------------------------------- heat map of m1^A in the (lam1, rho) plane (report Eq. 9.3)
+# Grid: simulated m1^A = |<x1, top eigenvector of A(x_hat)>| (sp.overlap_A_grid).
+# Red: level lines of the theory m1^A of Eq. 9.3 (sts.overlap_A_theory_report).
+
+def heat_overlap_A(lam2=3.0, mu=0.5, n=500, reps=5, levels=(0.2, 0.4, 0.6, 0.8, 0.95)):
+    lam1_values = np.linspace(0.5, 4, 30)
+    rho_values = np.linspace(0, 1, 30)
+    lam1_fine = np.linspace(0.5, 4, 300)          # for the theory
+    rho_fine = np.linspace(0, 1, 300)
+
+    Z = sp.overlap_A_grid(lam1_values, rho_values, lam2, mu, n, reps, alpha=ALPHA)
+
+    theory = np.zeros((len(rho_fine), len(lam1_fine)))
+    for i, rho in enumerate(rho_fine):
+        for j, lam1 in enumerate(lam1_fine):
+            theory[i, j] = sts.overlap_A_theory_report(lam1, lam2, rho, mu, n)
+
+    plt.figure(figsize=(7, 5.5))
+    plt.pcolormesh(lam1_values, rho_values, Z, cmap="Greys", vmin=0, vmax=1, shading="nearest")
+    plt.colorbar(label=r"$m_1^A$ (simulation)")
+    cs = plt.contour(lam1_fine, rho_fine, theory, levels=list(levels), colors="red", linewidths=1.5)
+    plt.clabel(cs, fontsize=8)
+    plt.plot([], [], color="red", lw=1.5, label=r"theory $m_1^A$ (Eq. 9.3)")     # legend entry for the contour
+    plt.xlabel(r"$\lambda_1$")
+    plt.ylabel(r"$\rho$")
+    plt.title(rf"$m_1^A = |\langle \hat x_A^{{(2)}}, x_1\rangle|$" + "\n"
+              + rf"$\lambda_2$={lam2}, $\mu$={mu}, $n$={n}, {reps} draws per point", fontsize=10)
+    plt.legend(loc="upper right", fontsize=8)
+    plt.tight_layout()
+    plt.savefig(os.path.join(DIR_PLOTS, f"heat_overlap_A_lam2={lam2}_mu={mu}_n={n}.png"), dpi=120)
+    plt.close()
+
+
+
 if __name__ == "__main__":
     todo = sys.argv[1:] or ["eig", "lam", "heat", "phase", "top_eigen_a_rho", "top_eigen_a_lam1", "bulk_A", "overlap_n", "overlap_rho", "overlap_lam1",
-                             "overlap_xhat_n", "overlap_xhat_rho", "overlap_xhat_lam1"]
+                             "overlap_xhat_n", "overlap_xhat_rho", "overlap_xhat_lam1", "phase_A", "phase_A_2"]
     if "eig" in todo: fig_eig()
     if "lam" in todo: fig_lambda()
     if "heat" in todo: fig_heat()
@@ -541,4 +662,7 @@ if __name__ == "__main__":
     if "overlap_xhat_n" in todo: overlap_xhat_vs_n()
     if "overlap_xhat_rho" in todo: overlap_xhat_vs_rho()
     if "overlap_xhat_lam1" in todo: overlap_xhat_vs_lam1()
+    if "phase_A" in todo: phase_A()
+    if "top_eig_A_old_vs_new" in todo: top_eig_A_old_vs_new()
+    if "heat_overlap_A" in todo: heat_overlap_A()
     plt.show()

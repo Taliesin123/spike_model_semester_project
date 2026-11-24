@@ -395,3 +395,58 @@ def eigvals_A_one_draw(n, lam1, lam2, rho, mu, alpha=np.sqrt(0.5)):
     eig_pg1 = np.linalg.eigvalsh(S.A(x_pg1, mu))
     eig_pg12 = np.linalg.eigvalsh(S.A(x_pg12, mu))
     return eig_xhat, eig_pg1, eig_pg12
+
+
+# ---------------------------------------------------------------- phase diagram of A (report, section 8.4)
+# used by phase_A in plot_maker_tali.py
+
+def n_outliers_one_draw(n, lam1, lam2, rho, mu, tol, alpha=np.sqrt(0.5)):
+    """One draw. Number of eigenvalues of A(x_hat) = Y2 - I + 2 mu F1(x_hat) sticking out of the bulk,
+    i.e. above the bulk edge c + 2 = 1 + 2 mu / n by more than tol (finite-n edge fluctuations ~ n^(-2/3))."""
+    S = TwoSpikes(n, lam1, lam2, rho, mu=mu, alpha=alpha)
+    _, x_hat = S.top_eigenvector(S.Y1)
+    eigvals = np.linalg.eigvalsh(S.A(x_hat, mu))
+    edge = 1 + 2 * mu / n
+    # rho_t = <x2, x3>, with x3 the part of x_hat orthogonal to x1 (x_hat = m1 x1 + sqrt(1 - m1^2) x3, report Eq. 7.3)
+    x1 = S.get_x1()
+    x2 = S.get_x2()
+    x_hat = x_hat * np.sign(x_hat @ x1)          # sign convention <x_hat, x1> >= 0 (A does not depend on it)
+    x3 = x_hat - (x_hat @ x1) * x1
+    x3 = x3 / np.linalg.norm(x3)
+    rho_t = x2 @ x3
+    return np.sum(eigvals > edge + tol), rho_t
+
+
+def n_outliers_grid(lam1_values, lam2_values, rho, mu, n, tol, alpha=np.sqrt(0.5)):
+    """Simulated number of outliers of A on the grid (one draw per point), shape (len(lam2_values), len(lam1_values)),
+    and theta_1, theta_2 of the full B (sts.top_eig_B) with rho_t measured on the same draw."""
+    Z = np.zeros((len(lam2_values), len(lam1_values)))
+    Theta = np.zeros((len(lam2_values), len(lam1_values)))     # theta_max of the full B, with the measured rho_t
+    Theta2 = np.zeros((len(lam2_values), len(lam1_values)))    # second eigenvalue theta_2 of the full B
+    for i, lam2 in enumerate(lam2_values):
+        for j, lam1 in enumerate(lam1_values):
+            Z[i, j], rho_t = n_outliers_one_draw(n, lam1, lam2, rho, mu, tol, alpha=alpha)
+            Theta[i, j] = sts.top_eig_B(lam1, lam2, rho, rho_t, mu, n)
+            Theta2[i, j] = sts.top_eig_B(lam1, lam2, rho, rho_t, mu, n, k=-2)
+    return Z, Theta, Theta2
+
+
+
+
+# ---------------------------------------------------------------- heat map of m1^A = |<x1, x_hat_A>| in the (lam1, rho) plane (report Eq. 9.3)
+# used by heat_overlap_A in plot_maker_tali.py
+
+def overlap_A_grid(lam1_values, rho_values, lam2, mu, n, reps, alpha=np.sqrt(0.5)):
+    """Simulated m1^A = |<x1, v>|, v = top eigenvector of A(x_hat) = Y2 - I + 2 mu F1(x_hat), x_hat = top eigenvector of Y1.
+    Mean over reps draws per point, shape (len(rho_values), len(lam1_values))."""
+    Z = np.zeros((len(rho_values), len(lam1_values)))
+    for i, rho in enumerate(rho_values):
+        for j, lam1 in enumerate(lam1_values):
+            list_o = []
+            for _ in range(reps):
+                S = TwoSpikes(n, lam1, lam2, rho, mu=mu, alpha=alpha)
+                _, x_hat = S.top_eigenvector(S.Y1)
+                _, v = S.top_eigenvector(S.A(x_hat, mu))
+                list_o.append(sts.overlap(S.get_x1(), v))
+            Z[i, j] = np.mean(list_o)
+    return Z
