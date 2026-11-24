@@ -1,4 +1,7 @@
 import numpy as np
+import numpy as np
+from scipy.optimize import brentq        
+
 class TwoSpikes:
     def __init__(self, N, lam1, lam2, rho, mu=1.0, alpha=np.sqrt(0.5)):
         self.N = N
@@ -183,6 +186,7 @@ class TwoSpikes:
 
         if "B" in method:
             # Method B: norm-constrained solve (A - lam*I) theta = b
+            F1 = self.fisher_MS(self.theta["1"], self.lam1)     # <- added
             b = 2 * mu * F1 @ self.theta["1"]
           
             thetaB, _ = solve_norm_constrained(A, b)
@@ -212,24 +216,41 @@ class TwoSpikes:
 
 
 ### Cross val on mu
-def cv_mu(MU, N, rho, lambda1, lambda2, M=10, method="A"):
-    """Pick mu minimizing the mean recovery loss over M resamples.
+def cv_mu(MU, N, rho, lambda1, lambda2, M=10, method="A", centered=False, return_overlaps=False):
+    """Pick mu minimizing the mean recovery loss (Loss_eval_2) over M resamples.
 
-    Returns (mu_opt, scores, scores_std).
+    centered=False: new samples (Y1, Y2, x1, x2) for each mu, raw loss (original behaviour).
+    centered=True : the same M samples are reused for every mu (common random numbers) and the
+                    mu-independent constant alpha||Y1||^2 + sqrt(1-alpha^2)||Y2||^2 + alpha + sqrt(1-alpha^2)
+                    is removed, leaving -2 x^T (alpha Y1 + sqrt(1-alpha^2) Y2) x. Much less noisy.
+    return_overlaps=True: also return the mean overlaps and their error std/sqrt(M),
+                          arrays of shape (len(MU), 2) = (m1, m2).
+
+    Returns (mu_opt, scores, scores_std) or (mu_opt, scores, scores_std, overlaps, overlaps_std).
     """
-    scores = []
-    scores_std = []
-    for mu in MU:
-        score = []
-        for _ in range(M):
-            S = TwoSpikes(N, lambda1, lambda2, rho, mu=mu)
+    L = np.zeros((M, len(MU)))
+    ov = np.zeros((M, len(MU), 2))
+    for s in range(M):
+        if centered:
+            S = TwoSpikes(N, lambda1, lambda2, rho)
+            w1, w2 = S.alpha, np.sqrt(1 - S.alpha ** 2)
+            const = (w1 * np.linalg.norm(S.Y1, "fro") ** 2 + w2 * np.linalg.norm(S.Y2, "fro") ** 2
+                     + w1 + w2)
+        for i, mu in enumerate(MU):
+            if centered:
+                S.set_mu(mu)
+            else:
+                S = TwoSpikes(N, lambda1, lambda2, rho, mu=mu)
+                const = 0.0
             S.compute_method([method])
-            score.append(S.Loss_eval_2(method))
-        score = np.array(score)
-        scores.append(np.mean(score))
-        scores_std.append(np.std(score) / np.sqrt(M))
+            L[s, i] = S.Loss_eval_2(method) - const
+            ov[s, i] = S.overlaps(method)
+    scores = L.mean(0)
+    scores_std = L.std(0) / np.sqrt(M)
     mu_opt = MU[int(np.argmin(scores))]
-    return mu_opt, np.array(scores), np.array(scores_std)
+    if return_overlaps:
+        return mu_opt, scores, scores_std, ov.mean(0), ov.std(0) / np.sqrt(M)
+    return mu_opt, scores, scores_std
 
 
 def mu_equilibrium(lambda1, lambda2):

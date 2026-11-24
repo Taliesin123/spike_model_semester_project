@@ -420,3 +420,230 @@ def overlap_naive_theory_report(lam1, lam2, rho, alpha=np.sqrt(0.5)):
     m1 = abs(theta_p * c1 / a) * ov
     m2 = abs(theta_p * c2 / b) * ov
     return m1, m2
+
+
+def methodeA_overlap(lam1, lam2, rho, mu, method="theory"):
+    """Final overlaps (m1_A, m2_A) = (|<x_hat_A, x1>|, |<x_hat_A, x2>|) of the method A estimator (n -> inf).
+
+    method="theory"  : closed form of the report (section 9.2)
+        Lambda    = 2 mu (lam1 - 1)^2,          m1 = sqrt(1 - 1/lam1^2)                          (8.1), (7.2)
+        theta_max = (Lambda + lam2)/2 + sqrt( ((Lambda - lam2)/2)^2 + Lambda lam2 m1^2 rho^2 )    (8.2)
+        r         = m1 rho Lambda / (theta_max - Lambda),
+        (c1, c2)  = (r, 1) / sqrt(r^2 + 2 m1 rho r + 1)                                          (8.7)
+        m1_A = |m1 c1 + rho c2| sqrt(1 - theta_max^-2),   m2_A = |theta_max c2 / lam2| sqrt(1 - theta_max^-2)   (9.3)
+
+    method="numeric" : same thing, but the 3x3 matrix beta (= B of the report) is diagonalized numerically,
+        in the orthonormal basis (e1, e2, e3) = (x1, (x2 - rho x1)/sqrt(1-rho^2), g_perp), so that
+        x1 = e1, x2 = rho e1 + sqrt(1-rho^2) e2. With theta, u the top eigenvalue / eigenvector of beta:
+        m1_A = sqrt(1 - theta^-2) |u[0]|,   m2_A = sqrt(1 - theta^-2) |rho u[0] + sqrt(1-rho^2) u[1]|.
+
+    Both give the same result (checked to 1e-15), except in the degenerate case rho = 0 and Lambda = lam2,
+    where the top eigenvector is not unique. m1_A = m2_A = 0 if theta_max <= 1.
+    Returns (m1_A, m2_A)."""
+    m1 = m1_theory(lam1)
+    Lam = 2 * mu * (lam1 - 1) ** 2
+
+    if method == "theory":
+        a = m1 * rho                                        # <x_hat_P1, x2>
+        theta = (Lam + lam2) / 2 + np.sqrt(((Lam - lam2) / 2) ** 2 + Lam * lam2 * a ** 2)
+        if theta <= 1:
+            return 0.0, 0.0
+        s = np.sqrt(1 - 1 / theta ** 2)
+        if a == 0:                                          # decoupled spikes: v = x_hat_P1 or x2
+            c1, c2 = (1.0, 0.0) if Lam > lam2 else (0.0, 1.0)
+            return s * abs(m1 * c1 + rho * c2), s * abs(a * c1 + c2)
+        r = a * Lam / (theta - Lam)
+        N = np.sqrt(r ** 2 + 2 * a * r + 1)
+        c1, c2 = r / N, 1 / N
+        return s * abs(m1 * c1 + rho * c2), s * abs(theta * c2 / lam2)
+
+    elif method == "numeric":
+        s_rho = np.sqrt(max(0.0, 1 - rho ** 2))
+        s_m = np.sqrt(max(0.0, 1 - m1 ** 2))
+        beta = np.array([
+            [Lam * m1 ** 2 + lam2 * rho ** 2, lam2 * rho * s_rho,    Lam * m1 * s_m],
+            [lam2 * rho * s_rho,              lam2 * (1 - rho ** 2), 0.0],
+            [Lam * m1 * s_m,                  0.0,                   Lam * (1 - m1 ** 2)],
+        ])
+        w, U = np.linalg.eigh(beta)
+        theta, u = w[-1], U[:, -1]
+        if theta <= 1:
+            return 0.0, 0.0
+        s = np.sqrt(1 - 1 / theta ** 2)
+        return s * abs(u[0]), s * abs(rho * u[0] + s_rho * u[1])
+
+    else:
+        raise ValueError('method must be "theory" or "numeric"')
+
+
+# ---------------------------------------------------------------- optimal mu for method A (section 11)
+def dmA2_dmu_theory(lam1, lam2, rho, mu):
+    """Analytical derivatives (d(m1_A^2)/dmu, d(m2_A^2)/dmu) of the method A overlaps of section 9.2
+    (chain rule on eqs. 8.2, 8.7, 9.3, with Lambda = 2 mu (lam1-1)^2, so d/dmu = 2 (lam1-1)^2 d/dLambda):
+        D       = sqrt(((Lambda - lam2)/2)^2 + Lambda lam2 a^2),          a = m1 rho
+        theta'  = 1/2 + ((Lambda - lam2)/2 + lam2 a^2) / (2 D)
+        r'      = a [ (theta - Lambda) - Lambda (theta' - 1) ] / (theta - Lambda)^2
+        N^2     = r^2 + 2 a r + 1,   c2 = 1/N,   c1 = r/N
+        c2'     = -(r + a) r' / N^3,  c1' = r' c2 + r c2'
+        (s^2)'  = 2 theta' / theta^3,  s^2 = 1 - theta^-2
+        (m1_A^2)' = 2 q1 (m1 c1' + rho c2') s^2 + q1^2 (s^2)',          q1 = m1 c1 + rho c2
+        (m2_A^2)' = 2 q2 (theta' c2 + theta c2') / lam2 s^2 + q2^2 (s^2)',  q2 = theta c2 / lam2
+    (' = d/dLambda). Returns (0, 0) if theta_max <= 1 (no outlier, overlaps = 0)."""
+    m1 = m1_theory(lam1)
+    dLam = 2 * (lam1 - 1) ** 2                              # dLambda/dmu
+    Lam = dLam * mu
+    a = m1 * rho
+    if a == 0:                                              # decoupled spikes: finite difference fallback
+        h = 1e-6 * max(mu, 1e-6)
+        mp, mm = np.array(methodeA_overlap(lam1, lam2, rho, mu + h)), np.array(methodeA_overlap(lam1, lam2, rho, max(mu - h, 0)))
+        return tuple((mp ** 2 - mm ** 2) / (mu + h - max(mu - h, 0)))
+    D = np.sqrt(((Lam - lam2) / 2) ** 2 + Lam * lam2 * a ** 2)
+    theta = (Lam + lam2) / 2 + D
+    if theta <= 1:
+        return 0.0, 0.0
+    dth = 0.5 + ((Lam - lam2) / 2 + lam2 * a ** 2) / (2 * D)
+    r = a * Lam / (theta - Lam)
+    dr = a * ((theta - Lam) - Lam * (dth - 1)) / (theta - Lam) ** 2
+    N = np.sqrt(r ** 2 + 2 * a * r + 1)
+    c1, c2 = r / N, 1 / N
+    dc2 = -(r + a) * dr / N ** 3
+    dc1 = dr * c2 + r * dc2
+    s2 = 1 - 1 / theta ** 2
+    ds2 = 2 * dth / theta ** 3
+    q1 = m1 * c1 + rho * c2
+    q2 = theta * c2 / lam2
+    dm1A2 = 2 * q1 * (m1 * dc1 + rho * dc2) * s2 + q1 ** 2 * ds2
+    dm2A2 = 2 * q2 * (dth * c2 + theta * dc2) / lam2 * s2 + q2 ** 2 * ds2
+    return dm1A2 * dLam, dm2A2 * dLam
+
+
+def loss_eval_A_theory(mu, lam1, lam2, rho, alpha=np.sqrt(0.5), p=1):
+    """Theoretical evaluation loss of method A (n -> inf), mu-dependent part, eq. (11.2):
+        L(mu) = sum_l w_l lam_l^p (1 - 2 m_l^2) - sum_l w_l lam_l^p,   w1 = alpha, w2 = sqrt(1-alpha^2)
+              = -2 [ w1 lam1^p m1_A^2 + w2 lam2^p m2_A^2 ]
+    p = 2: weights lam_l^2, as written in eq. (11.2) of the report.
+    p = 1: weights lam_l, what the expansion ||Y_l - x x^T||^2 = lam_l^2 - 2 lam_l m_l^2 + 1 + (noise) gives,
+           i.e. what TwoSpikes.Loss_eval_2 computes (up to the noise term -2 x^T Z_l x).
+    alpha: same weights as Loss_eval_2 (alpha = sqrt(1/2) -> both tasks weighted equally)."""
+    w1, w2 = alpha, np.sqrt(1 - alpha ** 2)
+    m1A, m2A = methodeA_overlap(lam1, lam2, rho, mu)
+    return -2 * (w1 * lam1 ** p * m1A ** 2 + w2 * lam2 ** p * m2A ** 2)
+
+
+def dloss_dmu_A_theory(mu, lam1, lam2, rho, alpha=np.sqrt(0.5), p=1):
+    """Optimality condition, eq. (11.4) of the report, analytical form:
+        dL/dmu = -2 sum_l w_l lam_l^p d(m_l^2)/dmu,   with d(m_l^2)/dmu from dmA2_dmu_theory.
+    Its zero (sign change - to +) is the optimal mu*.
+    (The report writes -4 sum lam_l^2 dm_l^2/dmu: the factor is 2 for d(m_l^2), 4 only if it means m_l dm_l.
+     The prefactor does not change the zero.)"""
+    w1, w2 = alpha, np.sqrt(1 - alpha ** 2)
+    d1, d2 = dmA2_dmu_theory(lam1, lam2, rho, mu)
+    return -2 * (w1 * lam1 ** p * d1 + w2 * lam2 ** p * d2)
+
+
+def mu_opt_A_theory(lam1, lam2, rho, alpha=np.sqrt(0.5), p=1, mu_min=1e-3, mu_max=1e2):
+    """Zero of dloss_dmu_A_theory (sign change from - to +, i.e. a minimum of L). None if no crossing."""
+    from scipy.optimize import brentq
+    grid = np.geomspace(mu_min, mu_max, 400)
+    g = np.array([dloss_dmu_A_theory(m, lam1, lam2, rho, alpha, p) for m in grid])
+    idx = np.where((g[:-1] < 0) & (g[1:] >= 0))[0]
+    if len(idx) == 0:
+        return None
+    i = idx[0]
+    return brentq(lambda m: dloss_dmu_A_theory(m, lam1, lam2, rho, alpha, p), grid[i], grid[i + 1])
+
+
+
+# ---------------------------------------------------------------- evaluation losses: biased vs unbiased (section 11, appendix C)
+def naive_theory(alpha, lam1, lam2, rho):
+    """Naive method (n -> inf), as a function of the importance factor alpha (section 5, appendix C.2).
+    Y = alpha Y1 + sqrt(1-alpha^2) Y2,  a = alpha lam1,  b = sqrt(1-alpha^2) lam2.
+    B (2x2, basis e1 = x1, e2 = (x2 - rho x1)/sqrt(1-rho^2)) is diagonalized numerically:
+        m1 = s |u0|,  m2 = s |rho u0 + sqrt(1-rho^2) u1|,  s = sqrt(1 - theta^-2)          (B.3)
+    Noise terms (C.6): eps1 = 2 alpha / theta,  eps2 = 2 sqrt(1-alpha^2) / theta
+    (theta <= 1: no outlier, m = 0 and x^T Z x -> 2, the bulk edge, i.e. theta -> 1 in the formula).
+    Returns (m1, m2, eps1, eps2)."""
+    a, b = alpha * lam1, np.sqrt(1 - alpha ** 2) * lam2
+    sr = np.sqrt(max(0.0, 1 - rho ** 2))
+    B = np.array([[a + b * rho ** 2, b * rho * sr],
+                  [b * rho * sr,     b * sr ** 2]])
+    w, U = np.linalg.eigh(B)
+    theta, u = w[-1], U[:, -1]
+    s = np.sqrt(1 - 1 / theta ** 2) if theta > 1 else 0.0
+    th = max(theta, 1.0)
+    return s * abs(u[0]), s * abs(rho * u[0] + sr * u[1]), 2 * alpha / th, 2 * np.sqrt(1 - alpha ** 2) / th
+
+
+def methodA_theory(mu, lam1, lam2, rho):
+    """Method A (n -> inf), as a function of mu_R (sections 8-9, appendix C.3).
+    B (3x3, basis e1 = x1, e2 = (x2 - rho x1)/sqrt(1-rho^2), e3 = x3) diagonalized numerically, top (theta, u):
+        m1A = s |u0|,  m2A = s |rho u0 + sqrt(1-rho^2) u1|,  m3A = s |u2|
+        q_s = <x_A, x^(1)> = s (m1 u0 + sqrt(1-m1^2) u2)                                     (C.9)
+    Noise terms: eps2 = 2 / theta (C.16),  eps1 = 2 q_s m3A = 2 q_s s u2 (C.28, signed).
+    Returns (m1A, m2A, eps1, eps2)."""
+    m1 = m1_theory(lam1)
+    Lam = 2 * mu * (lam1 - 1) ** 2
+    sr = np.sqrt(max(0.0, 1 - rho ** 2))
+    sm = np.sqrt(max(0.0, 1 - m1 ** 2))
+    B = np.array([[Lam * m1 ** 2 + lam2 * rho ** 2, lam2 * rho * sr, Lam * m1 * sm],
+                  [lam2 * rho * sr,                 lam2 * sr ** 2,  0.0],
+                  [Lam * m1 * sm,                   0.0,             Lam * sm ** 2]])
+    w, U = np.linalg.eigh(B)
+    theta, u = w[-1], U[:, -1]
+    if theta <= 1:
+        return 0.0, 0.0, 0.0, 2.0
+    s = np.sqrt(1 - 1 / theta ** 2)
+    qs = s * (m1 * u[0] + sm * u[2])
+    return s * abs(u[0]), s * abs(rho * u[0] + sr * u[1]), 2 * qs * s * u[2], 2 / theta
+
+
+def losses_theory(m1, m2, eps1, eps2, lam1, lam2):
+    """(L_eval, L_biased) - cst, unweighted sum over the two tasks (eqs. 11.2, 11.4):
+        L_eval   = -2 (lam1 m1^2 + lam2 m2^2)
+        L_biased = L_eval - 2 (eps1 + eps2)"""
+    L = -2 * (lam1 * m1 ** 2 + lam2 * m2 ** 2)
+    return L, L - 2 * (eps1 + eps2)
+
+
+# ---------------------------------------------------------------- tuned losses (theory, vectorized over the parameter grid)
+def _overlaps_from_beta(B, rho):
+    """Stack of beta matrices (..., k, k) in the basis e1 = x1, e2 = (x2 - rho x1)/sqrt(1-rho^2), ...
+    Returns (m1, m2) of the top eigenvector after BBP: s |u0|, s |rho u0 + sqrt(1-rho^2) u1|, s = sqrt(1 - theta^-2)."""
+    w, U = np.linalg.eigh(B)
+    theta, u = w[..., -1], U[..., :, -1]
+    s = np.sqrt(np.clip(1 - 1 / np.maximum(theta, 1e-12) ** 2, 0, None)) * (theta > 1)
+    sr = np.sqrt(max(0.0, 1 - rho ** 2))
+    return s * np.abs(u[..., 0]), s * np.abs(rho * u[..., 0] + sr * u[..., 1])
+
+
+def loss_tuned_naive_theory(lam1, lam2, rho, alphas=np.linspace(0, 1, 201)):
+    """min over alpha of L_eval = -2 (lam1 m1^2 + lam2 m2^2) for the naive method. Returns (L*, alpha*)."""
+    a, b = alphas * lam1, np.sqrt(1 - alphas ** 2) * lam2
+    sr = np.sqrt(max(0.0, 1 - rho ** 2))
+    B = np.zeros((len(alphas), 2, 2))
+    B[:, 0, 0] = a + b * rho ** 2
+    B[:, 0, 1] = B[:, 1, 0] = b * rho * sr
+    B[:, 1, 1] = b * sr ** 2
+    m1, m2 = _overlaps_from_beta(B, rho)
+    L = -2 * (lam1 * m1 ** 2 + lam2 * m2 ** 2)
+    k = np.argmin(L)
+    return L[k], alphas[k]
+
+
+def loss_tuned_A_theory(lam1, lam2, rho, mus=np.geomspace(1e-2, 1e3, 301)):
+    """min over mu_R of L_eval = -2 (lam1 m1A^2 + lam2 m2A^2) for method A (same beta as methodA_theory).
+    Returns (L*, mu*)."""
+    m1 = m1_theory(lam1)
+    Lam = 2 * mus * (lam1 - 1) ** 2
+    sr = np.sqrt(max(0.0, 1 - rho ** 2))
+    sm = np.sqrt(max(0.0, 1 - m1 ** 2))
+    B = np.zeros((len(mus), 3, 3))
+    B[:, 0, 0] = Lam * m1 ** 2 + lam2 * rho ** 2
+    B[:, 0, 1] = B[:, 1, 0] = lam2 * rho * sr
+    B[:, 0, 2] = B[:, 2, 0] = Lam * m1 * sm
+    B[:, 1, 1] = lam2 * sr ** 2
+    B[:, 2, 2] = Lam * sm ** 2
+    m1A, m2A = _overlaps_from_beta(B, rho)
+    L = -2 * (lam1 * m1A ** 2 + lam2 * m2A ** 2)
+    k = np.argmin(L)
+    return L[k], mus[k]
