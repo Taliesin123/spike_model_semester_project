@@ -5,6 +5,7 @@ __pycache__/
 
 # extensions
 *.pyc
+*.npz
 
 # files
 .DS_Store
