@@ -444,6 +444,75 @@ Multiplying the first relation in Eq. \eqref{eq:overlaps-signals} by $a\,\langle
 
 \end{table}
 
+\noindent
+In the large $n$ limit, $\widetilde\rho = \< \vect x_2, \vect x_3\>\to0$ and
+\begin{equation}
+    \rdmmat B =
+    \begin{pmatrix}
+        \Lambda m_1^2 + \lambda_2\rho^2 & \lambda_2\rho\sqrt{1-\rho^2} & \Lambda m_1\sqrt{1-m_1^2}\\
+        \lambda_2\rho\sqrt{1-\rho^2} & \lambda_2(1-\rho^2) & 0\\
+        \Lambda m_1\sqrt{1-m_1^2} & 0 & \Lambda(1-m_1^2)
+    \end{pmatrix}.
+    \label{eq:B_A_limit}
+\end{equation}
+
+\subsection{Top eigenvector of $\rdmmat B$ in the orthonormal basis}\label{sec:v_max_methodeA}
+For the computations of Appendix~\ref{an:A_full_Loss}, it can be convenient to also write the top eigenvector of $\rdmmat B$ directly in the basis $\{\vect e_i\}_{i=1}^3$. Define the unnormalized components
+\[
+\begin{aligned}
+\tilde v_1&=-\beta_{13}\,(\beta_{22}-\theta_{max}),\\
+\tilde v_2&=\beta_{12}\beta_{13},\\
+\tilde v_3&=(\beta_{11}-\theta_{max})(\beta_{22}-\theta_{max})-\beta_{12}^2,
+\end{aligned}
+\]
+and the normalized ones
+\[
+v_i=\frac{\tilde v_i}{\sqrt{\tilde v_1^2+\tilde v_2^2+\tilde v_3^2}},\qquad i=1,2,3,
+\]
+so that the unit eigenvector associated with $\theta_{max}$ is
+$\vect v_{\max}=v_1\vect e_1+v_2\vect e_2+v_3\vect e_3$
+(valid for $0<m_1<1$, when $\theta_{max}$ is simple and $\tilde{\vect v}\neq\vect 0$).
+Since $\vect x_1=\vect e_1$, $\vect x_2=\rho\,\vect e_1+\sqrt{1-\rho^2}\,\vect e_2$ and $\vect x_3=\vect e_3$ in the limit $\Tilde{\rho}\to0$,
+\[
+q_1^1 = \langle\vect v_{\max},\vect x_1\rangle=v_1,\qquad
+q_2^1 = \langle\vect v_{\max},\vect x_2\rangle=\rho\, v_1+\sqrt{1-\rho^2}\,v_2 ,\qquad
+q_3^1 = \langle\vect v_{\max},\vect x_3\rangle=v_3,
+\]
+which coincide, up to a global sign, with the expressions of Eq.~\eqref{eq:q_A}.
+
+\subsection{Phase diagram of $\rdmmat A$}\label{adix:phase_A}
+We prove Proposition~\ref{prop:phase_A}. Write $s := m_1^2\rho^2 \in [0,1)$, so that $p(\theta) = (\theta-\theta_1)(\theta-\theta_2)$ with $p$ of Eq.~\eqref{eq:p_theta}.
+
+\paragraph{Interlacing.} Evaluating $p$ at $\Lambda$ and at $\lambda_2$,
+\[
+    p(\Lambda) = p(\lambda_2) = -\Lambda\lambda_2\, s \le 0 ,
+\]
+so both $\Lambda$ and $\lambda_2$ lie between the roots:
+\begin{equation}
+    \theta_2 \le \min(\Lambda, \lambda_2) \le \max(\Lambda, \lambda_2) \le \theta_1 .
+    \label{eq:sandwich}
+\end{equation}
+
+\paragraph{Value at $1$.} The sign of $p(1) = (1-\theta_1)(1-\theta_2)$ tells whether $1$ lies between the roots, and
+\[
+    p(1) = (\Lambda-1)(\lambda_2-1) - \Lambda\lambda_2\, s = \lambda_2\big(\Lambda(1-s) - 1\big) + 1 - \Lambda .
+\]
+
+\paragraph{Case $\Lambda < 1$.} By Eq.~\eqref{eq:sandwich}, $\theta_2 \le \Lambda < 1$: there is at most one outlier, and $\theta_1 > 1$ if and only if $p(1) < 0$. Since $\Lambda(1-s) - 1 < 0$, this reads
+\[
+    \lambda_2 > \frac{1-\Lambda}{1-\Lambda(1-s)} = f_{01}(\lambda_1) .
+\]
+So there is no outlier for $\lambda_2 < f_{01}(\lambda_1)$ and one outlier for $\lambda_2 > f_{01}(\lambda_1)$. Note that $f_{01} \le 1$, since $\Lambda s \ge 0$.
+
+\paragraph{Case $\Lambda > 1$.} By Eq.~\eqref{eq:sandwich}, $\theta_1 \ge \Lambda > 1$: there is at least one outlier, and $\theta_2 > 1$ if and only if $p(1) > 0$. If $\Lambda(1-s) \le 1$, then $p(1) \le 1 - \Lambda < 0$ and there is exactly one outlier. If $\Lambda(1-s) > 1$, then $p(1) > 0$ if and only if
+\[
+    \lambda_2 > \frac{\Lambda-1}{\Lambda(1-s)-1} = f_{12}(\lambda_1) ,
+\]
+so there are two outliers above $f_{12}$ and one below. Note that $f_{12} \ge 1$, since $\Lambda s \ge 0$.
+
+\noindent
+Together, the two cases give Proposition~\ref{prop:phase_A}; $\Lambda = 1$ is a boundary of measure zero. Finally, for $\lambda_2 < 1$, the condition $\lambda_2 > f_{01}(\lambda_1)$ of the first case can be solved for $\Lambda$: it reads $\Lambda > \Lambda^*$, with $\Lambda^*$ of Eq.~\eqref{eq:Lambda_star}, and $\Lambda^* < 1$.
+
 \subsection{Method B: resolvent of A}
 \label{app:B_resolvent}
 
@@ -511,6 +580,12 @@ where the expression of $S_W'$ follows from $S_W'(z) = S_W/(2S_W - z)$ (Appendix
 so that $2S_W - z = (S_W^2-1)/S_W$. Setting this to $1$ gives Eq.~\eqref{eq:B_norm}.
 
 \paragraph{Step 5: existence, uniqueness, and convergence of $\lambda$.}
+Writing $A = \sum_{j=1}^n \gamma_j\, u_j u_j^\top$ with $\gamma_1\ge\gamma_2\ge\dots$, the norm constraint $\|\hat x^{(2)}_B(\lambda)\| = 1$ reads
+\begin{equation}
+    \kappa^2\sum_{j=1}^n \frac{\langle u_j,\hat x^{(1)}\rangle^2}{(\gamma_j-\lambda)^2} = 1 .
+    \label{eq:secular_B}
+\end{equation}
+Its left-hand side has a pole at every eigenvalue of $A$ and decreases from $+\infty$ to $0$ on $(\gamma_1,\infty)$, so it has a unique root $\lambda>\gamma_1$, which is the one selected.
 Let $\Phi(z)$ be the left-hand side of Eq.~\eqref{eq:B_norm}. It is the limit of the left-hand side of Eq.~\eqref{eq:secular_B},
 $\kappa^2\sum_j \langle u_j,\hat x^{(1)}\rangle^2/(\gamma_j-\lambda)^2$, which is positive and strictly decreasing on $(\gamma_1,\infty)$.
 Hence $\Phi$ is non-increasing; being analytic and non-constant, it is strictly decreasing.

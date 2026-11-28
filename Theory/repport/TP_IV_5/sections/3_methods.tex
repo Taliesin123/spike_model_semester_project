@@ -1,0 +1,46 @@
+\section{Methods}\label{sec:methods}
+\subsection{Naive method}\label{sec:naive_def}
+We now consider $k=2$ correlated tasks. In contrast with multi-modal models, where each spike is a modality with its own estimator, the multi-task setting keeps a \emph{single} estimator $\hat{\vect x}$ that must remain good on all the tasks. A first, intuitive method is designed from the multi-task loss
+\[
+    \mathcal{L}_{\mathrm{MSE}}(\vect x) := \alpha \norm{\rdmmat Y_1 - \vect x\vect x^T}^2_F + \sqrt{1-\alpha^2} \norm{\rdmmat Y_2 - \vect x\vect x^T}^2_F\,,\qquad \alpha \in [0,1].
+\]
+Its Hessian, $\mathcal{H} = \alpha \rdmmat Y_1 + \sqrt{1-\alpha^2}\, \rdmmat Y_2 - ( \alpha + \sqrt{1-\alpha^2})\rdmmat I$, depends on the data only through the combined observation $\alpha \rdmmat Y_1 + \sqrt{1-\alpha^2}\, \rdmmat Y_2$. As in the single-spike case, the associated spectral method takes as estimator the top eigenvector of this observation, $\rdmmat Y_{naive} := \alpha \rdmmat Y_1 + \sqrt{1-\alpha^2}\, \rdmmat Y_2$, where $\alpha \in [0,1]$ is the importance factor of task~$1$. Unlike the single-spike case, there is no reason for this method to be optimal with correlated spikes, as is known for multi-modal inference~\cite{Keup_2025, mergny2025spectralthresholdscorrelatedspiked, tabanelli2025computationalthresholdsmultimodallearning}. It also sees both tasks at the same time, so it is not a continual learning method: it serves as a baseline for the sequential methods of Section~\ref{sec:ewc}, which process the tasks one after the other.
+
+\subsection{EWC-inspired methods}\label{sec:ewc}
+Continual learning is \emph{sequential}: a first task is learned, then a new one arrives, and the estimator should be updated without forgetting the first. This is the philosophy of Elastic Weight Consolidation (EWC). We first process task~$1$ alone, taking as first-stage estimator $\hat{\vect x}^{(1)}$ the minimiser of the misspecified loss $\mathcal L_{1,\mathrm{MS}}(\vect x) = -\tfrac14\norm{\vect Y_1 - \vect x\vect x^\top}_F^2$, which is essentially the top eigenvector of $\vect Y_1$. When task~$2$ is observed, we minimise its loss plus a quadratic penalty that keeps the new estimator close to $\hat{\vect x}^{(1)}$ along the directions that matter for task~$1$.
+These directions are encoded by the Fisher matrix $\mathcal F(\vect x) = \mathbb E[\nabla\mathcal L(\vect x)\nabla\mathcal L(\vect x)^\top]$. For the misspecified loss it has the closed form (Appendix~\ref{adix:fisher})
+\[
+    \mathcal F_{\mathrm{MS}}(\vect x) = (\lambda_1 - 1)^2\vect x\vect x^\top + \tfrac1n(\vect I + \vect x\vect x^\top).
+\]
+As in standard EWC, it is evaluated at the end of the first stage, $\vect F_1 := \mathcal F_{\mathrm{MS}}(\hat{\vect x}^{(1)})$, and then frozen while task~$2$ is optimised. The EWC loss reads
+\[
+    \mathcal L_{\mathrm{EWC}}(\vect x) = -\tfrac14\norm{\vect Y_2 - \vect x\vect x^\top}_F^2 
+    + \mu_R\,(\vect x - \hat{\vect x}^{(1)})^\top \vect F_1 (\vect x - \hat{\vect x}^{(1)}),
+    \qquad \mu_R \ge 0.
+\]
+Imposing stationarity under the constraint $\norm{\vect x}^2 = 1$ and linearising (Appendix~\ref{adix:ewc}) gives the affine system
+\begin{equation}
+    \vect A\vect x = \vect b, \qquad
+    \vect A = \vect Y_2 + 2\mu_R \vect F_1 - \vect I, \qquad
+    \vect b = 2\mu_R \vect F_1 \hat{\vect x}^{(1)}, \qquad
+    \label{eq:stationary_condition}
+\end{equation}
+where $\vect A$ is also the Hessian $\mathcal H_{\mathrm{EWC}}$ of the EWC loss. Unlike the multi-task losses, this equation is affine rather than homogeneous, so it is not directly an eigenvector problem. We consider two estimators:
+\begin{itemize}
+    \item \textbf{Method A (spectral).} Drop $\vect b$ and take
+    $\hat{\vect x}^{(2)}_A = \operatorname{top-eigenvector}(\vect A)$, which has unit norm by construction.
+    \item \textbf{Method B (resolvent).} Solve~\eqref{eq:stationary_condition} directly:
+        $\hat{\vect x}^{(2)}_B = 2\mu_R\,\vect R_{\vect A}(0)\,\vect F_1 \hat{\vect x}^{(1)}$,
+    where $\vect R_{\vect A}(z) = (\vect A - z\vect I)^{-1}$ is the resolvent of $\vect A$.
+\end{itemize}
+
+In practice $\mathcal H_{\mathrm{EWC}}$ has near-zero eigenvalues, so $\vect A$ is numerically singular. To enforce $\norm{\vect x} = 1$ exactly, we add a Lagrange multiplier $\lambda$ for $g(\vect x) = \norm{\vect x}^2 - 1$. The $\vect x$-stationarity condition becomes $\bigl(\vect A - \lambda\vect I\bigr)\vect x = \vect b$. So $\lambda$ acts as a spectral shift, moving the evaluation point of the resolvent of $\vect A$ from $z=0$ to $z=\lambda$, which regularises the inversion:
+\begin{equation}
+    \boxed{\hat{\vect x}^{(2)}(\lambda) = 2\mu_R\,\vect R_{\vect A}(\lambda)\,\vect F_1 \hat{\vect x}^{(1)}},
+    \qquad \text{with $\lambda$ fixed by } \norm{\hat{\vect x}^{(2)}(\lambda)} = 1.
+    \label{eq:final_estimator_lagrange}
+\end{equation}
+
+\noindent
+Both estimators are governed by the same matrix $\vect A = \mathcal H_{\mathrm{EWC}} = \vect Y_2 - \vect I + 2\mu_R\vect F_1$. Method~A uses its top eigenvector, and Method~B (with or without the Lagrange shift) uses its resolvent. Whether these estimators recover the signals therefore depends on the spectrum of $\vect A$: its outlier eigenvalues, the alignment of the corresponding eigenvectors with $\vect x_1$ and $\vect x_2$, and how close its eigenvalues come to zero. The rest of this report studies $\vect A$.\\
+
