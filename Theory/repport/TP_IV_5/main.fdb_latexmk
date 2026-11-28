@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex main"] 1795896898.12815 "main.aux" "main.bbl" "main" 1795896901.20935 0
+["bibtex main"] 1795897298.75193 "main.aux" "main.bbl" "main" 1795897301.4873 0
   "./references.bib" 1795892087.18417 3691 335a00ee86e5afc547ea95b23afb43be ""
-  "/usr/local/texlive/2026/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "main.aux" 1795896900.76881 26288 b7c949afe07121bbbd1812045a0b4d97 "pdflatex"
+  "/usr/local/texlive/2026/texmf-dist/bibtex/bst/base/unsrt.bst" 1292289607 18030 1376b4b231b50c66211e47e42eda2875 ""
+  "main.aux" 1795897301.15369 26477 1bbe0cfa8160aa5d0c8da5ce1a02ab5d "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1795896898.22216 "main.tex" "main.pdf" "main" 1795896901.20953 2
+["pdflatex"] 1795897298.84599 "main.tex" "main.pdf" "main" 1795897301.48747 2
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc" 1254269338 2375 baa924870cfb487815765f9094cf3728 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc" 1202520719 3486 c7eadf5dcc57b3b2d11736679f6636ba ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc" 1202520719 2405 5dcf2c1b967ee25cc46c58cd52244aed ""
@@ -259,18 +259,19 @@
   "figures/phase_method_A_rho=0.3_n=500_reps=3.png" 1795896783.01202 42686 82532621e1fe8948433ea71747f9a53d ""
   "figures/phase_method_B_rho=0.3_n=500_reps=3.png" 1795896783.0157 37302 540e1bd36263985b18ea244facc5eddf ""
   "figures/phase_rho=0.3.png" 1795883086 40749 9a3a6ce8a82fa3bb4b99cebb6ddc8de7 ""
+  "figures/top_eig_A_old_vs_new_lam1=2.0_lam2=3.0_rho=0.5_mu=0.5.png" 1795896888.7975 43706 cb278872892a99136fd4c8704299a1c9 ""
   "macro.tex" 1795883086 15336 7f4edcabf5519c70ae6fd7f8944d41ab ""
-  "main.aux" 1795896900.76881 26288 b7c949afe07121bbbd1812045a0b4d97 "pdflatex"
-  "main.bbl" 1795896898.21896 2545 cc0b80430b90e6ac85c30233ba649821 "bibtex main"
-  "main.out" 1795896900.77076 8761 190c9e44e83fcccf39c070eb6df8617c "pdflatex"
-  "main.tex" 1795896347.05998 1756 af486c3d4680b461554ad78c966f29ac ""
-  "sections/1_introduction.tex" 1795896347.05879 1922 74d00e1bb9ca44caa5ac91bd95c2fbce ""
+  "main.aux" 1795897301.15369 26477 1bbe0cfa8160aa5d0c8da5ce1a02ab5d "pdflatex"
+  "main.bbl" 1795897298.84277 2545 cc09434cc2f2f0ea752fc042c118558a "bibtex main"
+  "main.out" 1795897301.1554 8761 190c9e44e83fcccf39c070eb6df8617c "pdflatex"
+  "main.tex" 1795897159.17328 1756 fb10035c9fbd09c7b529890d2907a566 ""
+  "sections/1_introduction.tex" 1795897174.11183 1259 2efbecf5fd24a09408931894b6021c9a ""
   "sections/2_single-spike-model.tex" 1795896347.05299 5280 140fafbfe747510e078b506f73f62146 ""
   "sections/3_methods.tex" 1795895220.49997 5376 2772fcb6af0b97173c173b731d886361 ""
   "sections/4_general_results.tex" 1795892087.18232 2914 5b0f30c10e128d83ae7b04b9ff44caa6 ""
   "sections/5_naive-method.tex" 1795896347.05483 2707 4bdab3472011d995c640c71e8d0d61c3 ""
-  "sections/6_numerics.tex" 1795896841.18171 2229 2b481ecfadbbc758bafd6fc4430fae94 ""
-  "sections/7_methodA.tex" 1795896347.05639 21063 56720d222978d4a4e6833b1196e5f457 ""
+  "sections/6_numerics.tex" 1795897159.17485 2426 a098025dbd81ac3f3d08caa0f9618cc8 ""
+  "sections/7_methodA.tex" 1795897159.17166 21051 ff197d2671bed5214dc91db238d0062c ""
   "sections/8_optimal_param.tex" 1795889045.61359 11760 c6464efa232c5c384c349a15ec9c5011 ""
   "sections/99_annexe.tex" 1795896347.0614 51030 5879f5009d8fd83d27c0f8e68cedf619 ""
   "sections/name.tex" 1795883086 63 42a65a6f0f3f8ec11a04e38c8c30ed8b ""

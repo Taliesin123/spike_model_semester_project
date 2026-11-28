@@ -227,6 +227,12 @@ INPUT sections/1_introduction.tex
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmr12.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmbx12.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmri10.tfm
+INPUT ./sections/2_single-spike-model.tex
+INPUT ./sections/2_single-spike-model.tex
+INPUT ./sections/2_single-spike-model.tex
+INPUT ./sections/2_single-spike-model.tex
+INPUT sections/2_single-spike-model.tex
+INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmbx12.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmbx10.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/lm/ot1lmr.fd
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/lm/ot1lmr.fd
@@ -286,12 +292,6 @@ INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/stmaryrd/Ustmry.fd
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/stmaryrd/stmary10.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/stmaryrd/stmary8.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/stmaryrd/stmary6.tfm
-INPUT ./sections/2_single-spike-model.tex
-INPUT ./sections/2_single-spike-model.tex
-INPUT ./sections/2_single-spike-model.tex
-INPUT ./sections/2_single-spike-model.tex
-INPUT sections/2_single-spike-model.tex
-INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmbx12.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmr8.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/ec-lmr6.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/lm/rm-lmbx10.tfm
@@ -417,6 +417,11 @@ INPUT ./figures/overlap_B_vs_lam1_rho=0.5_n=300.png
 INPUT ./figures/overlap_B_vs_lam1_rho=0.5_n=300.png
 INPUT ./figures/overlap_B_vs_lam1_rho=0.5_n=300.png
 INPUT ./figures/overlap_B_vs_lam1_rho=0.5_n=300.png
+INPUT ./figures/top_eig_A_old_vs_new_lam1=2.0_lam2=3.0_rho=0.5_mu=0.5.png
+INPUT ./figures/top_eig_A_old_vs_new_lam1=2.0_lam2=3.0_rho=0.5_mu=0.5.png
+INPUT ./figures/top_eig_A_old_vs_new_lam1=2.0_lam2=3.0_rho=0.5_mu=0.5.png
+INPUT ./figures/top_eig_A_old_vs_new_lam1=2.0_lam2=3.0_rho=0.5_mu=0.5.png
+INPUT ./figures/top_eig_A_old_vs_new_lam1=2.0_lam2=3.0_rho=0.5_mu=0.5.png
 INPUT ./figures/phase_rho=0.3.png
 INPUT ./figures/phase_rho=0.3.png
 INPUT ./figures/phase_rho=0.3.png
