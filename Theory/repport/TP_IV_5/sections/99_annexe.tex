@@ -1,0 +1,863 @@
+\section{BBP transitions}
+\subsection{BBP transition: rank one perturbation}
+\begin{proof} 
+    We consider
+    \[
+    Y = a\, x_1 x_1^T + W, \qquad W \sim \mathrm{GOE}, \qquad \|x_1\| = 1, \qquad a > 0.
+    \]
+    \paragraph{Top eigenvalue}
+    
+    The eigenvalues $z$ of $Y$ satisfy
+    \[
+    \det(z I - Y) = 0
+    \]
+    and we look for eigenvalues outside the semicircle, i.e.\ $z \notin [-2,2]$. In that case $\det(z I - W) \neq 0$, so we can write
+    \[
+    \det\left[ (z I - W)\left( I - a\, (z I - W)^{-1} x_1 x_1^T \right) \right] = 0
+    \]
+    We define the resolvent
+    \[
+    \mathrm{Res}(z) = (z I - W)^{-1} 
+    \]
+    Since $\det(z I - W) \neq 0$, we need $\det\left( I - a\, \mathrm{Res}(z)\, x_1 x_1^T \right) = 0$. \\
+    Using
+    \[
+    \det(I - AB) = \det(I - BA)
+    \]
+    with $A = a\, \mathrm{Res}(z)\, x_1$ and $B = x_1^T$, we obtain
+    \[
+    a\, x_1^T\, \mathrm{Res}(z)\, x_1 = 1
+    \]
+    As W is real and symetric, we can write it sum lambdai ui ui with the ui orthogonal eigenvectors. The zI -  W has the same eigenvectors with eigenvalues z - lambdai, in a certain basis, this matrix is diagonal and we can inverse it givin the next equation. So the revolvent projects on u and multiplies by the factor 1/ z - lambdai.
+    We expand $\mathrm{Res}(z)$ in the eigenbasis of $W$. Let $\lambda_i$ be the eigenvalues of $W$ and $u_i$ the associated orthonormal eigenvectors. Then
+    \[
+    \mathrm{Res}(z) = \sum_{i=1}^{N} \frac{u_i u_i^T}{z - \lambda_i}
+    \]
+    so
+    \[
+    x_1^T\, \mathrm{Res}(z)\, x_1 = \sum_{i=1}^{N} \frac{(x_1 \cdot u_i)^2}{z - \lambda_i}
+    \]
+    In mean, (could also say as W is GOE is rotation invariant, so applying a rotation doesn't change the eigenvalues) $x_1$ is uniform in all directions of the eigenbasis of $W$ as $W$ is GOE. Hence for $N \gg 1$,
+    \[
+    (x_1 \cdot u_i)^2 \to \frac{1}{N}
+    \]
+    and
+    \[
+    x_1^T\, \mathrm{Res}(z)\, x_1 = \frac{1}{N} \sum_{i=1}^{N} \frac{1}{z - \lambda_i} = S_W(z),
+    \]
+    where $S_W(z)$ is the Stieltjes transform of the empirical spectral distribution of $W$. CITER COURS DE SPOC ICI\\
+    For a probability measure $\mu$ on $\mathbb{R}$ and $z$ outside its support, the Stieltjes transform is
+    \[
+    S_\mu(z) = \int \frac{d\mu(\lambda)}{z - \lambda} .
+    \]
+    For the empirical spectral distribution of $W$,
+    \[
+    \hat{\mu}_N = \frac{1}{N} \sum_{i=1}^{N} \delta_{\lambda_i},
+    \]
+    We know that the empirical spectral distribution converges to $\mu_{sc}$, the semicircle law:
+    \[
+    d\mu_{sc}(\lambda) = \frac{1}{2\pi} \sqrt{4 - \lambda^2}\; \mathbf{1}_{[-2,2]}(\lambda)\, d\lambda
+    \]
+    Therefore
+    \[
+    S_W(z) \to \frac{1}{2\pi} \int_{-2}^{2} \frac{\sqrt{4 - \lambda^2}}{z - \lambda}\, d\lambda
+    \]
+    With the change of variable $\lambda = 2 \cos \phi$, $\phi \in [0, \pi]$, we have $d\lambda = -2 \sin\phi\, d\phi$ and $\sqrt{4 - \lambda^2} = 2 \sin \phi$, so
+    \[
+    \frac{1}{2\pi} \int_{-2}^{2} \frac{\sqrt{4 - \lambda^2}}{z - \lambda}\, d\lambda
+    = \frac{2}{\pi} \int_{0}^{\pi} \frac{\sin^2 \phi}{z - 2 \cos \phi}\, d\phi
+    = \frac{z - \sqrt{z^2 - 4}}{2}, \qquad z > 2 .
+    \]
+    \\
+    Hence $z$ is solution of
+    \[
+    a\, \frac{z - \sqrt{z^2 - 4}}{2} = 1
+    \]
+    This gives $z - \dfrac{2}{a} = \sqrt{z^2 - 4}$, so
+    \[
+    \left( z - \frac{2}{a} \right)^2 = z^2 - 4
+    \quad \Longleftrightarrow \quad
+    - \frac{4 z}{a} + \frac{4}{a^2} = -4
+    \quad \Longleftrightarrow \quad
+    z = a + \frac{1}{a} .
+    \]
+    Moreover, $z - \dfrac{2}{a} = \sqrt{z^2-4} \geq 0$ requires $a - \dfrac{1}{a} \geq 0$, and $z \geq 2$, which gives $a \geq 1$.\\
+    We then arrive to the result that
+    \[
+    \boxed{
+    z = a + \frac{1}{a} \quad \text{if } a \geq 1
+    }
+    \]
+    For $a > 1$, $Y$ has an eigenvalue $z = a + 1/a > 2$ outside the bulk $[-2,2]$. For $a \leq 1$, there is no solution with $z > 2$ and the largest eigenvalue of $Y$ sticks to the edge of the semicircle at $2$.
+    \paragraph{Overlap}
+    Lets define $\vect u(a)$, the top eigenvector of $\vect Y$ associated with the eigenvalue found earlier $z(a)$ (with a the signal to noise ration), so that $\vect Y \vect u(a) = z(a) \vect u(a) $. Derinving by $a$, we get:
+    \[
+    \frac{\mathrm{d \vect Y(a)}}{\mathrm{d} a} \vect u(a) + \vect Y(a) \frac{\mathrm{d} \vect u(a)}{\mathrm{d} a} = \frac{\mathrm{d} z(a)}{\mathrm{d} a} \vect u(a) + z(a) \frac{\mathrm{d} \vect u(a)}{\mathrm{d} a}
+    \]
+    We have $\frac{\mathrm{d \vect Y(a)}}{\mathrm{d} a} = \frac{\mathrm{d}}{\mathrm{d} a} (a\, x_1 x_1^T + W) = x_1 x_1^T$. Left multiplying by $\vect u(a) ^\top$ and since $\vect u(a)^\top \vect Y = z(a) \vect u(a)^\top$ :
+    \[
+    (\vect x_1 \cdot \vect u(a))^2 = \frac{\mathrm{d} z(a)}{\mathrm{d} a}
+    \]
+    Considering the limit $N>>1$:
+    
+    \[
+        m = |< \vect x_1 , \vect u(a)>|= \begin{cases}
+        0 & \text{if } a \le 1,\\[0.3em]
+        \sqrt{1-a^{-2}} & \text{if } a > 1.
+    \end{cases}
+    \]
+    \label{proof:BBP1}
+    
+\end{proof}
+
+\subsection{Proof of the BBP transition for $k$ spikes}\label{proof:BBP_k_spikes}
+
+We use the setting of Section~\ref{sec:model}: $\rdmmat Y=\rdmmat P+\rdmmat W+c\rdmmat I_n$, with $\rdmmat P=\rdmmat E\rdmmat B\rdmmat E^T$, $\rdmmat E=(\vect e_1\;\dots\;\vect e_k)$ and $\rdmmat B$ symmetric with eigenvalues $\theta_1>\dots>\theta_k>0$ (assumed distinct and positive). Note that we only need \emph{some} orthonormal basis $(\vect e_i)$ of $\mathrm{span}(\vect x_1,\dots,\vect x_k)$: the eigenvalues of $\rdmmat B$ are the non-zero eigenvalues of $\rdmmat P$, whatever the basis. Since $\rdmmat Y-c\rdmmat I_n$ has the same eigenvectors as $\rdmmat Y$ and eigenvalues shifted by $c$, we take $c=0$ and add $c$ at the end.
+
+\begin{proof}[Proof of eq.~\eqref{eq:BBP-k-spikes}]
+Let $z$ be an eigenvalue of $\rdmmat Y$ with $z\notin[-2,2]$, and $\mathrm{Res}(z)=(z\rdmmat I_n-\rdmmat W)^{-1}$. Exactly as in the two-spike case,
+\[
+\det(z\rdmmat I_n-\rdmmat Y)=0
+\;\Rightarrow\;
+\det\big(\rdmmat I_n-\mathrm{Res}(z)\rdmmat E\rdmmat B\rdmmat E^T\big)=0
+\;\Rightarrow\;
+\det\big(\rdmmat I_k-\rdmmat B\,\rdmmat E^T\mathrm{Res}(z)\rdmmat E\big)=0,
+\]
+where we used $\det(\rdmmat I_n-\rdmmat X\rdmmat Y)=\det(\rdmmat I_k-\rdmmat Y\rdmmat X)$ with $\rdmmat X=\mathrm{Res}(z)\rdmmat E$ and $\rdmmat Y=\rdmmat B\rdmmat E^T$ (the $k\times k$ matrix to study is $\rdmmat E^T\mathrm{Res}(z)\rdmmat E$, with entries $\vect e_i^T\mathrm{Res}(z)\vect e_j$).
+
+Since $\rdmmat W$ is orthogonally invariant and $(\vect e_i)$ is orthonormal, as for two spikes
+\[
+\vect e_i^T\mathrm{Res}(z)\vect e_i\to S_W(z),\qquad \vect e_i^T\mathrm{Res}(z)\vect e_j\to0\ (i\neq j),
+\qquad\text{i.e.}\qquad
+\rdmmat E^T\mathrm{Res}(z)\rdmmat E\to S_W(z)\,\rdmmat I_k .
+\]
+The equation becomes
+\[
+\det\big(\rdmmat I_k-S_W(z)\rdmmat B\big)=0
+\;\Longleftrightarrow\;
+\prod_{l=1}^k\big(1-\theta_l S_W(z)\big)=0,
+\]
+because $\rdmmat B$ has eigenvalues $\theta_1,\dots,\theta_k$. So the $k$ correlated spikes decouple into $k$ independent equations $S_W(z)=1/\theta_l$. Each one is solved as in the rank-one case: from $S_W^2-zS_W+1=0$ we get $z=S_W+1/S_W$, hence
+\[
+z=\theta_l+\frac1{\theta_l}\quad\text{if }\theta_l>1,
+\]
+and there is no solution outside $[-2,2]$ if $\theta_l\le1$ (the eigenvalue sticks to the edge of the bulk, $\lambda\to2$). Adding back $c$ gives eq.~\eqref{eq:BBP-k-spikes}.
+\end{proof}
+
+\subsubsection{Proof of the overlaps}\label{proof:BBP_k_overlaps}
+
+Let $\theta_l>1$, $\lambda=\lambda^{\mathrm{out}}_l$ the corresponding outlier of $\rdmmat Y$ and $\vect u=\vect u_l$ its unit eigenvector. We use $S_W(z)=\frac{z-\sqrt{z^2-4}}{2}$ and, by differentiating $S_W^2-zS_W+1=0$,
+\[
+S_W'(z)=\frac{S_W(z)}{2S_W(z)-z}.
+\]
+At $z_l=\theta_l+1/\theta_l$ we have $S_W(z_l)=1/\theta_l$ and $2S_W-z=\frac{1-\theta_l^2}{\theta_l}$, so $S_W'(z_l)=\frac1{1-\theta_l^2}$.
+\begin{comment}
+\begin{proof}[Proof of eq.~\eqref{eq:BBP_overlap_k_spikes}]
+From $(\lambda\rdmmat I-\rdmmat W)\vect u=\rdmmat E\rdmmat B\rdmmat E^T\vect u$, setting $\vect w:=\rdmmat B\rdmmat E^T\vect u\in\R^k$:
+\[
+\vect u=\mathrm{Res}(\lambda)\rdmmat E\vect w,
+\qquad
+\rdmmat E^T\vect u=\rdmmat E^T\mathrm{Res}(\lambda)\rdmmat E\,\vect w\simeq S_W(z_l)\,\vect w=\frac{\vect w}{\theta_l}.
+\]
+\emph{Direction of $\vect w$.} Plugging into the definition of $\vect w$: $\vect w=\rdmmat B\rdmmat E^T\vect u\simeq\frac1{\theta_l}\rdmmat B\vect w$, i.e. $\rdmmat B\vect w\simeq\theta_l\vect w$. Since $\theta_l$ is a simple eigenvalue of $\rdmmat B$, $\vect w\parallel\tilde{\vect v}_l$.
+
+\emph{Norm of $\vect w$.} Using $\mathrm{Res}'(z)=-\mathrm{Res}(z)^2$ and $\rdmmat E^T\mathrm{Res}'(z)\rdmmat E\to S_W'(z)\rdmmat I_k$,
+\[
+1=\norm{\vect u}^2=\vect w^T\rdmmat E^T\mathrm{Res}(\lambda)^2\rdmmat E\,\vect w\simeq-S_W'(z_l)\norm{\vect w}^2=\frac{\norm{\vect w}^2}{\theta_l^2-1}
+\;\Rightarrow\;\norm{\vect w}^2\simeq\theta_l^2-1 .
+\]
+
+\emph{Overlap.} Since $\vect v_{l'}=\rdmmat E\tilde{\vect v}_{l'}$,
+\[
+\langle\vect u,\vect v_{l'}\rangle=\tilde{\vect v}_{l'}^T\rdmmat E^T\vect u\simeq\frac1{\theta_l}\tilde{\vect v}_{l'}^T\vect w
+=\pm\frac{\sqrt{\theta_l^2-1}}{\theta_l}\,\delta_{ll'},
+\]
+because $\vect w\parallel\tilde{\vect v}_l$ and the $\tilde{\vect v}_{l'}$ are orthonormal. Squaring gives $\delta_{ll'}\big(1-\theta_l^{-2}\big)$.
+\end{proof}
+
+\begin{remark}[Without resolvent: Hellmann--Feynman]
+Fix the $\vect v_l$ and let $\rdmmat Y(\boldsymbol\theta)=\rdmmat W+\sum_l\theta_l\vect v_l\vect v_l^T$. Differentiating $\rdmmat Y\vect u_j=\lambda_j\vect u_j$ and multiplying by $\vect u_j^T$ gives $\partial\lambda_j/\partial\theta_l=\langle\vect u_j,\vect v_l\rangle^2$. Since $\lambda_j\to\theta_j+1/\theta_j$ depends on $\theta_j$ only,
+$\langle\vect u_j,\vect v_l\rangle^2\to\delta_{jl}\big(1-\theta_j^{-2}\big)$.
+\end{remark}
+\end{comment}
+\begin{remark}[Alternative argument: Hellmann--Feynman]
+Fix $\rdmmat W$ and the unit vectors $\vect v_1,\dots,\vect v_k$, and consider
+\[
+\rdmmat Y(\boldsymbol\theta)=\rdmmat W+\sum_{l=1}^k\theta_l\vect v_l\vect v_l^T,
+\qquad \boldsymbol\theta\in D:=\{\theta_1>\dots>\theta_k>1\}.
+\]
+Let $\lambda_1(\boldsymbol\theta)\ge\lambda_2(\boldsymbol\theta)\ge\cdots$ be the eigenvalues of $\rdmmat Y(\boldsymbol\theta)$ and $\vect u_j$ unit eigenvectors.
+
+\smallskip
+\noindent\emph{Step 1: Hellmann--Feynman formula.}
+If $\lambda_j$ is a simple eigenvalue, it is differentiable in $\boldsymbol\theta$. Differentiating $\rdmmat Y\vect u_j=\lambda_j\vect u_j$ with respect to $\theta_l$ gives
+\[
+\vect v_l\vect v_l^T\vect u_j+\rdmmat Y\,\partial_{\theta_l}\vect u_j=(\partial_{\theta_l}\lambda_j)\vect u_j+\lambda_j\,\partial_{\theta_l}\vect u_j .
+\]
+Multiplying on the left by $\vect u_j^T$ and using $\vect u_j^T\rdmmat Y=\lambda_j\vect u_j^T$, the terms in $\partial_{\theta_l}\vect u_j$ cancel, so
+\[
+\frac{\partial\lambda_j}{\partial\theta_l}=\langle\vect u_j,\vect v_l\rangle^2 .
+\]
+Similarly, if $\lambda_j>\lambda_{j+1}$, then $\Lambda_j:=\lambda_1+\dots+\lambda_j$ is differentiable and
+\[
+\frac{\partial\Lambda_j}{\partial\theta_l}=\sum_{i\le j}\langle\vect u_i,\vect v_l\rangle^2 .
+\]
+This is the case with high probability on $D$, since the outliers are separated from each other and from the bulk.
+
+\smallskip
+\noindent\emph{Step 2: convergence of the derivatives.}
+By Ky Fan's principle, $\Lambda_j(\boldsymbol\theta)=\max_{\rdmmat Q^T\rdmmat Q=\rdmmat I_j}\mathrm{tr}\big(\rdmmat Q^T\rdmmat Y(\boldsymbol\theta)\rdmmat Q\big)$ is a maximum of affine functions of $\boldsymbol\theta$, hence convex. For $\boldsymbol\theta\in D$ and $j\le k$, the eigenvalue convergence $\lambda_i\to\theta_i+\theta_i^{-1}$ gives, almost surely,
+\[
+\Lambda_j(\boldsymbol\theta)\longrightarrow \Lambda_j^\infty(\boldsymbol\theta):=\sum_{i\le j}\Big(\theta_i+\frac1{\theta_i}\Big).
+\]
+(Convergence holds a.s.\ simultaneously for all $\boldsymbol\theta$ in a countable dense subset of $D$, and then, by convexity, for all $\boldsymbol\theta\in D$.)
+The limit $\Lambda_j^\infty$ is $C^1$ on $D$. A classical result on convex functions (e.g.\ Rockafellar, \emph{Convex Analysis}, Thm.~25.7) states that if convex functions $f_n$ converge pointwise on an open convex set to a function $f$ differentiable at $\boldsymbol\theta$, then $\nabla f_n(\boldsymbol\theta)\to\nabla f(\boldsymbol\theta)$. Hence, for every $\boldsymbol\theta\in D$,
+\[
+\sum_{i\le j}\langle\vect u_i,\vect v_l\rangle^2=\frac{\partial\Lambda_j}{\partial\theta_l}
+\longrightarrow\frac{\partial\Lambda_j^\infty}{\partial\theta_l}
+=\mathbf 1_{\{l\le j\}}\Big(1-\frac1{\theta_l^2}\Big).
+\]
+
+\smallskip
+\noindent\emph{Step 3: conclusion.}
+Taking the difference between $j$ and $j-1$ (with $\Lambda_0:=0$),
+\[
+\langle\vect u_j,\vect v_l\rangle^2
+=\frac{\partial\Lambda_j}{\partial\theta_l}-\frac{\partial\Lambda_{j-1}}{\partial\theta_l}
+\longrightarrow\big(\mathbf 1_{\{l\le j\}}-\mathbf 1_{\{l\le j-1\}}\big)\Big(1-\frac1{\theta_l^2}\Big)
+=\delta_{jl}\Big(1-\frac1{\theta_j^{2}}\Big).
+\]
+\end{remark}
+\subsubsection{Proof of the overlap with the signals}
+
+Since $\vect x_i=\sum_{l}q_i^l\vect v_l$, we have $\langle\vect u_l,\vect x_i\rangle=\sum_{l'}q_i^{l'}\langle\vect u_l,\vect v_{l'}\rangle$. By eq.~\eqref{eq:BBP_overlap_k_spikes} only $l'=l$ survives, so
+\[
+\big|\langle\vect u_l,\vect x_i\rangle\big|\to|q_i^l|\sqrt{1-\frac1{\theta_l^2}},
+\]
+which is eq.~\eqref{eq:overlap_signal_k-spikes}. (In your notes the sum should read $\langle\vect u_l,\vect v_{l'}\rangle$, not $\langle\vect u_{l'},\vect v_{l'}\rangle$.)
+
+%\paragraph{Factorised form:}
+\section{Application of BBP}
+\subsection{Naive Method}\label{proof:naive}
+The observable splits into a noise part and a low rank signal part:
+\begin{equation}
+    \rdmmat Y = \underbrace{a\,\vect{x_1}\vect{x_1}^T + b\,\vect{x_2}\vect{x_2}^T}_{=:\ \rdmmat P}
+              + \underbrace{\alpha \rdmmat Z_1 + \sqrt{1-\alpha^2}\,\rdmmat Z_2}_{=:\ \rdmmat W}
+    \qquad
+    a := \alpha\lambda_1, \quad b := \sqrt{1-\alpha^2}\,\lambda_2
+    \label{eq:Y-split}
+\end{equation}
+Since $\rdmmat Z_1$ and $\rdmmat Z_2$ are independent with entries of variance $1/n$, the entries of $\rdmmat W$ are Gaussian with variance $(\alpha^2 + 1 - \alpha^2)/n = 1/n$: the noise $\rdmmat W$ is again a Wigner matrix. So \eqref{eq:Y-split} is a rank-two spiked Wigner model whose spike matrix $\rdmmat P$ carries all the dependence on $\alpha$, $\lambda_1$, $\lambda_2$ and $\rho$. We can then compute its spectrum in closed form from section \ref{sec:general_results} with $P$ and $c=0$.
+
+Expanding $\rdmmat P$ in an orthonormal basis $(e_1, e_2)$ of $\mathrm{span}(x_1, x_2)$ defined by
+    \[
+    x_1 = e_1, \qquad x_2 = \rho\, e_1 + \sqrt{1-\rho^2}\, e_2 .
+    \]
+    We have
+    \[
+    \rdmmat P = (a + b\rho^2)\, \vect e_1 \vect e_1^T + b\rho\sqrt{1-\rho^2}\, ( \vect e_1 \vect e_2^T + \vect e_2 \vect e_1^T) + b(1-\rho^2)\, \vect e_2 \vect e_2^T ,
+    \]
+    so that
+    \[
+    \vect P = \vect E \vect B \vect E^T, \qquad \vect E = (\vect e_1 \;\; \vect e_2),
+    \]
+    where $\vect E$ is the $N \times 2$ matrix with columns $\vect e_1, \vect e_2$ and
+    \[
+    \vect B = \begin{pmatrix} a + b\rho^2 & b\rho\sqrt{1-\rho^2} \\ b\rho\sqrt{1-\rho^2} & b(1-\rho^2) \end{pmatrix}
+    \]
+
+\paragraph{Eigenvalues and eigenvectors of the signal matrix $\rdmmat P$}
+From section \ref{sec:model}, the non zero eigenvalues of $\rdmmat P$ are the same as $\rdmmat B$. Leading to the eigenvalues
+\begin{equation}
+    \boxed{\;
+    \theta_\pm = \frac{a+b}{2} \pm \sqrt{\Big(\frac{a-b}{2}\Big)^2 + ab\,\rho^2}
+    \;}
+    \qquad
+    a = \alpha\lambda_1, \quad b = \sqrt{1-\alpha^2}\,\lambda_2
+    \label{eq:theta-pm}
+\end{equation}
+The discriminant is non-negative, so $\theta_\pm \in \mathbb{R}$. \\
+For this method, our estimator is the top eigenvector of $\rdmmat Y$, and so only the top eigenvalue $\theta_+$ will be studied. Computing the top eigenvector of $\rdmmat B$ and expanding them in the $\R^n$ space, from section \ref{sec:model}, the top eigenvector of $\rdmmat P$ is:
+\[
+    \boxed{
+    \vect v_+ = c_1^+\,\vect{x_1} + c_2^+\,\vect{x_2},
+    \qquad
+    \big(c_1^+,\, c_2^+\big) = \frac{\big(r,\, 1\big)}{\sqrt{r^2 + 2\rho\, r + 1}},
+    \qquad
+    r = \frac{\rho\, a}{\theta_+ - a} = \frac{\theta_+ - b }{b \; \rho}.
+    }
+\]
+the full calculation of the eigenvectors is in Annex \ref{sec:eigenvect_naive}.
+In the limit $N >> 1$, leading to:
+\[
+    q_1^+ = \langle \vect x_1, \vect v_+ \rangle = c_1^+ + \rho c_2^+ \qquad q_2^+ = \langle \vect x_2, \vect v_+ \rangle = c_2^+ + \rho c_1^+
+\]
+
+
+\paragraph{Overlap of the estimator with the signals.}
+Then considering our estimator $\hat{\vect x}_{naive} := \vect u_+$ being the top eigenvector of the observation $\rdmmat Y$. From equation \ref{eq:overlap_signal_k-spikes}, and rewriting $q_1^+$ and $q_2^+$, the overlap with our signals are:
+
+\begin{equation}
+\boxed{
+    m_1 := |\langle \hat{\vect x}_{naive}, \vect{x_1}\rangle| \xrightarrow[n\to\infty]{\text{a.s.}} \Bigg \lvert \frac{\theta_+}{a}c_1^+ \Bigg \rvert \; \sqrt{1-\theta_+^{-2}} }
+    \qquad
+    \boxed{
+    m_2 := |\langle \hat{\vect x}_{naive}, \vect{x_2}\rangle| \xrightarrow[n\to\infty]{\text{a.s.}} \Bigg \lvert  \frac{\theta_+}{b}c_2^+  \Bigg \rvert \; \sqrt{1-\theta_+^{-2}} }
+    \label{eq:m12-naive}
+\end{equation}
+for $\theta_+ > 1$, and $m_1, m_2 \to 0$ for $\theta_+ \le 1$.
+
+
+\paragraph{Derivation of the signal matrix eigenvectors } \label{sec:eigenvect_naive}
+We now derive the eigenvectors of $\rdmmat P$ in closed form. We assume $a, b > 0$ (i.e.\ $\alpha \in (0,1)$ and $\lambda_1, \lambda_2 > 0$) and $\rho \in [0,1)$, so that both $\theta_\pm$ are strictly positive. We introduce
+\begin{equation}
+    \Delta := \sqrt{\Big(\frac{a-b}{2}\Big)^2 + ab\,\rho^2},
+    \qquad \text{so that} \qquad
+    \theta_\pm = \frac{a+b}{2} \pm \Delta.
+    \label{eq:Delta}
+\end{equation}
+We exclude the degenerate case $a = b$, $\rho = 0$, in which $\theta_+ = \theta_-$ and every vector of $\operatorname{span}(\vect{x_1},\vect{x_2})$ is an eigenvector.
+
+%\paragraph{Going to the plane of the signals (méthode de Celia):} 
+\noindent
+Since the eigenvectors lie in $\operatorname{span}(\vect{x_1},\vect{x_2})$, we can express them in $\operatorname{span}(\vect{x_1},\vect{x_2})$. Let $\vect v$ be a unit eigenvector of $\rdmmat P$ with eigenvalue $\theta \neq 0$. Since
+\begin{equation}
+    \rdmmat P \vect v = a\,\langle \vect{x_1}, \vect v\rangle\,\vect{x_1} + b\,\langle \vect{x_2}, \vect v\rangle\,\vect{x_2} = \theta\,\vect v
+\end{equation}
+and we write
+\begin{equation}
+    \vect v = c_1\,\vect{x_1} + c_2\,\vect{x_2},
+    \qquad
+    \langle \vect{x_1}, \vect v\rangle = c_1 + \rho\, c_2,
+    \qquad
+    \langle \vect{x_2}, \vect v\rangle = \rho\, c_1 + c_2 .
+    \label{eq:ansatz}
+\end{equation}
+Substituting into the eigenvalue equation and identifying the coefficients of $\vect{x_1}$ and $\vect{x_2}$ (which are linearly independent since $\rho < 1$) gives
+\begin{equation}
+    \begin{cases}
+        a\,(c_1 + \rho\, c_2) = \theta\, c_1 ,\\[2pt]
+        b\,(\rho\, c_1 + c_2) = \theta\, c_2 ,
+    \end{cases}
+    \label{eq:eig-system}
+\end{equation}
+A non-trivial solution exists if and only if $\theta \in \{\theta_+, \theta_-\}$, recovering \eqref{eq:theta-pm}. For $\rho > 0$ we have $(\theta_\pm - a)(\theta_\pm - b) = ab\rho^2 > 0$, so $\theta_\pm \neq a$, and the first row yields
+\begin{equation}
+    c_1 = r_\pm\, c_2,
+    \qquad
+    r_\pm := \frac{\rho\, a}{\theta_\pm - a} = \frac{\theta_\pm - b}{b\rho},
+    \label{eq:ratio}
+\end{equation}
+where the two expressions for $r_\pm$ agree precisely because of the characteristic equation. For the same reason, the second row of \eqref{eq:eig-system} is then automatically satisfied.
+
+%\paragraph{Normalization:} 
+\noindent
+We can then normalize the eigenvector, using that $\norm{\vect{x_1}} = \norm{\vect{x_2}} = 1$ and $\langle \vect{x_1},\vect{x_2}\rangle = \rho$,
+\begin{equation}
+    \norm{\vect v}^2 = c_1^2 + 2\rho\, c_1 c_2 + c_2^2
+    = c_2^2\,\big( r_\pm^2 + 2\rho\, r_\pm + 1 \big) = 1
+    \quad \Longrightarrow \quad
+    c_2 = \pm \big( r_\pm^2 + 2\rho\, r_\pm + 1 \big)^{-1/2}
+\end{equation}
+The bracket is strictly positive, since $r^2 + 2\rho r + 1 = (r+\rho)^2 + 1 - \rho^2 > 0$.
+
+%\paragraph{Final expression for the eigenvectors of the noiseless $\rdmmat P$:} 
+\noindent
+Combining \eqref{eq:ratio} with the normalization, the unit-norm eigenvectors of $\rdmmat P$ associated with $\theta_\pm$ are, up to an overall sign,
+\begin{equation}
+    \boxed{
+    \hat{\vect v}_\pm = c_1^\pm\,\vect{x_1} + c_2^\pm\,\vect{x_2},
+    \qquad
+    \big(c_1^\pm,\, c_2^\pm\big) = \frac{\big(r_\pm,\, 1\big)}{\sqrt{r_\pm^2 + 2\rho\, r_\pm + 1}},
+    \qquad
+    r_\pm = \frac{\rho\, a}{\theta_\pm - a} .
+    }
+    \label{eq:v-final}
+\end{equation}
+
+%\paragraph{Overlaps of the noiseless eigenvectors with the signals:} 
+\noindent
+The overlaps of $\hat{\vect v}_\pm$ with the signals follow directly from \eqref{eq:ansatz} and \eqref{eq:eig-system}, since $c_1 + \rho c_2 = \theta c_1/a$ and $\rho c_1 + c_2 = \theta c_2/b$:
+\begin{equation}
+\boxed{
+    \langle \hat{\vect v}_\pm, \vect{x_1}\rangle = \frac{\theta_\pm}{a}\, c_1^\pm}
+    \qquad
+    \boxed{
+    \langle \hat{\vect v}_\pm, \vect{x_2}\rangle = \frac{\theta_\pm}{b}\, c_2^\pm}
+    \label{eq:overlaps-signals}
+\end{equation}
+Eq. \eqref{eq:overlaps-signals} shows that the \emph{coefficients} $c_i^\pm$ (how much of each signal we put into the mixture) are not the same thing as the \emph{overlaps} $\langle \hat{\vect v}_\pm, \vect{x_i}\rangle$ (how much of each signal we actually see), because $\vect{x_1}$ and $\vect{x_2}$ are not orthogonal.
+
+\medskip
+\noindent
+Multiplying the first relation in Eq. \eqref{eq:overlaps-signals} by $a\,\langle \hat{\vect v}_\pm, \vect{x_1}\rangle$, its second by $b\,\langle \hat{\vect v}_\pm, \vect{x_2}\rangle$, adding, and using the normalization $c_1^2 + 2\rho c_1 c_2 + c_2^2 = 1$, we get
+\begin{equation}
+\boxed{
+    \theta_\pm \;=\; \hat{\vect v}_\pm^{\,T}\, \rdmmat P\, \hat{\vect v}_\pm
+    \;=\; a\,\langle \hat{\vect v}_\pm, \vect{x_1}\rangle^2 + b\,\langle \hat{\vect v}_\pm, \vect{x_2}\rangle^2}
+    \label{eq:theta-pm-relation}
+\end{equation}
+
+
+\subsection{Method A and B: Matrix $\rdmmat A$}\label{tab:coefficients_beta_A(xP1)}
+
+\begin{table}[htbp]
+    \centering
+    
+    
+    \renewcommand{\arraystretch}{1.8}
+    \begin{tabular}{|c|l|}
+        \hline
+        Coefficient & Expression \\
+        \hline
+        $\beta_{11}$
+        & $\Lambda m_1^2+\lambda_2\rho^2$ \\
+
+        $\beta_{22}$
+        & $\lambda_2(1-\rho^2-\widetilde{\rho}^{\,2})$ \\
+
+        $\beta_{33}$
+        & $\Lambda(1-m_1^2)+\lambda_2\widetilde{\rho}^{\,2}$ \\
+
+        $\beta_{12}=\beta_{21}$
+        & $\lambda_2\rho\sqrt{1-\rho^2-\widetilde{\rho}^{\,2}}$ \\
+
+        $\beta_{13}=\beta_{31}$
+        & $\Lambda m_1\sqrt{1-m_1^2}
+        +\lambda_2\rho\widetilde{\rho}$ \\
+
+        $\beta_{23}=\beta_{32}$
+        & $\lambda_2\widetilde{\rho}
+        \sqrt{1-\rho^2-\widetilde{\rho}^{\,2}}$ \\
+        \hline
+    \end{tabular}
+
+    \vspace{0.3cm}
+    \begin{minipage}{0.9\textwidth}
+        \footnotesize
+        \[
+        \Lambda=2\mu_R\left((\lambda_1-1)^2+\frac{1}{n}\right).
+        \]
+    \end{minipage}
+    \caption{Coefficients $\beta_{ij}$ of the signal matrix $\vect P$ of $\vect A(\vect{ \hat x}^{(1)}_{P_1})$  in the orthonormal basis$\{\vect e_i\}_{i=1}^3$.}
+    \label{tab:beta_A}
+
+\end{table}
+
+\subsection{Method B: resolvent of A}
+\label{app:B_resolvent}
+
+\paragraph{Setting.} By Eq.~\eqref{eq:A_xP1}, $A = P + W + cI_n$ with $P = EBE^\top$, $E = (e_1\, e_2\, e_3)$ and $B$ the matrix of Table~\ref{tab:beta_A} (with $\tilde\rho \to 0$).
+The noise $W = Z_2$ is a Wigner matrix independent of $\hat x^{(1)}$, which is built from $Y_1$ only.
+In the limit $\tilde\rho \to 0$, the vectors $\hat x^{(1)}, x_1, x_2$ all lie in $\mathrm{span}(e_1,e_2,e_3)$, and
+\begin{equation}
+    \hat x^{(1)} = \sum_{l} q_{sl}\, v_l, \qquad x_i = \sum_l q_{il}\, v_l, \qquad v_l = E\tilde v_l .
+\end{equation}
+Fix $\lambda > \gamma_1$ and write $z = \lambda - c$. As in Appendix A.2, let $\mathrm{Res}(z) = (zI_n - W)^{-1}$.
+
+\paragraph{Step 1: reduction to a $3\times 3$ matrix.}
+Since $A - \lambda I_n = -\big(\mathrm{Res}(z)^{-1} - EBE^\top\big)$, the Woodbury identity gives
+\begin{equation}
+    R_A(\lambda) = (A-\lambda I_n)^{-1}
+    = -\Big[\mathrm{Res} + \mathrm{Res}\,E\,B\,\big(I_3 - E^\top \mathrm{Res}\,E\,B\big)^{-1} E^\top \mathrm{Res}\Big] .
+\end{equation}
+Write $H := E^\top \mathrm{Res}(z) E \in \mathbb{R}^{3\times 3}$. Projecting on the signal subspace, and using
+$B(I_3 - HB)^{-1} = (I_3 - BH)^{-1}B$,
+\begin{equation}
+    -E^\top R_A(\lambda) E = H + H(I_3 - BH)^{-1} B H
+    = H (I_3 - BH)^{-1}\big[(I_3 - BH) + BH\big]
+    = H\,(I_3 - BH)^{-1} .
+\end{equation}
+
+\paragraph{Step 2: deterministic limit.}
+Exactly as in the proof of Eq.~\eqref{eq:BBP-k-spikes} (Appendix~\ref{proof:BBP_k_spikes}), the orthogonal invariance of $W$ gives
+$H \to S_W(z)\, I_3$ almost surely, for $z$ outside the limiting spectrum. This uses that $E$ is independent of $W$.
+Hence $-E^\top R_A(\lambda) E \to S_W(z)\,\big(I_3 - S_W(z) B\big)^{-1}$, which is diagonal in the eigenbasis of $B$:
+\begin{equation}
+    \langle v_l, R_A(\lambda)\, v_{l'}\rangle
+    \xrightarrow[n\to\infty]{a.s.}
+    -\,\delta_{ll'}\, \frac{S_W(z)}{1-\theta_l S_W(z)} .
+    \label{eq:B_resolvent}
+\end{equation}
+This requires $1 - \theta_l S_W(z) \neq 0$, i.e. $z \neq \theta_l + \theta_l^{-1}$: these are precisely the outliers of Eq.~\eqref{eq:BBP-k-spikes},
+and $z > z_*$ since $\lambda > \gamma_1$.
+
+\paragraph{Step 3: overlaps.}
+Expanding $x_i$ and $\hat x^{(1)}$ on the $v_l$,
+\begin{equation}
+    \langle x_i, \hat x^{(2)}_B\rangle = \kappa\, \langle x_i, R_A(\lambda)\, \hat x^{(1)}\rangle
+    = \kappa \sum_{l,l'} q_{il}\, q_{sl'}\, \langle v_l, R_A(\lambda)\, v_{l'}\rangle
+    \longrightarrow
+    -\kappa \sum_{l} q_{il}\, q_{sl}\, \frac{S_W(z)}{1-\theta_l S_W(z)} ,
+\end{equation}
+which is Eq.~\eqref{eq:B_overlap} after taking absolute values. The term $l = 3$ vanishes since $q_{s3} = 0$.
+
+\paragraph{Step 4: norm equation.}
+Since $\partial_\lambda (A-\lambda I_n)^{-1} = (A-\lambda I_n)^{-2}$,
+\begin{equation}
+    \big\|\hat x^{(2)}_B\big\|^2 = \kappa^2 \langle \hat x^{(1)}, R_A(\lambda)^2\, \hat x^{(1)}\rangle
+    = \kappa^2\, \partial_\lambda \langle \hat x^{(1)}, R_A(\lambda)\, \hat x^{(1)}\rangle .
+\end{equation}
+On any compact subset of $(z_*,\infty)$ these functions are analytic, and the convergence of Step 2 is uniform.
+By Weierstrass' theorem the derivatives converge as well. Using
+$\partial_z \frac{S_W}{1-\theta S_W} = \frac{S_W'}{(1-\theta S_W)^2}$,
+\begin{equation}
+    \big\|\hat x^{(2)}_B\big\|^2 \longrightarrow
+    \kappa^2 \sum_l q_{sl}^2\, \frac{-S_W'(z)}{\big(1-\theta_l S_W(z)\big)^2} ,
+    \qquad
+    -S_W'(z) = \frac{S_W(z)^2}{1-S_W(z)^2},
+\end{equation}
+where the expression of $S_W'$ follows from $S_W'(z) = S_W/(2S_W - z)$ (Appendix~\ref{proof:BBP_k_overlaps}) and $z = S_W + 1/S_W$,
+so that $2S_W - z = (S_W^2-1)/S_W$. Setting this to $1$ gives Eq.~\eqref{eq:B_norm}.
+
+\paragraph{Step 5: existence, uniqueness, and convergence of $\lambda$.}
+Let $\Phi(z)$ be the left-hand side of Eq.~\eqref{eq:B_norm}. It is the limit of the left-hand side of Eq.~\eqref{eq:secular_B},
+$\kappa^2\sum_j \langle u_j,\hat x^{(1)}\rangle^2/(\gamma_j-\lambda)^2$, which is positive and strictly decreasing on $(\gamma_1,\infty)$.
+Hence $\Phi$ is non-increasing; being analytic and non-constant, it is strictly decreasing.
+As $z\to\infty$, $S_W \sim 1/z$ and $-S_W' \sim 1/z^2$, so $\Phi \to 0$.
+As $z\to z_*^+$, $\Phi\to+\infty$: if $\theta_{\max} > 1$, because $1 - \theta_{\max} S_W \to 0$ and $q_{s1} \neq 0$ for $m_1\rho > 0$ (Eq.~\eqref{eq:v_A});
+otherwise because $S_W \to 1$ and $-S_W' \to \infty$ as $z \to 2^+$.
+The equation $\Phi(z) = 1$ thus has a unique root $z^\star > z_*$. Since the finite-$n$ functions are monotone and converge pointwise to $\Phi$,
+their roots converge, $\lambda - c \to z^\star$. Plugging $z^\star$ in Step 3 concludes the proof. \hfill$\square$
+
+\section{Proof of the Optimal regularization parameter}
+
+\subsection{Expansion of the Evaluation Loss}\label{an:exp-loss}
+
+\[
+    \norm{\rdmmat Y_l - \vect \hat x\vect \hat x^T}^2_F = \text{Tr} \left[ \big(\rdmmat Y_l - \vect \hat x\vect \hat x^T \big)^T \cdot \big(\rdmmat Y_l - \vect \hat x\vect \hat x^T \big) \right] 
+\]
+substituting $\rdmmat Y_l = \lambda_l \vect x_l \vect x_l^T + \rdmmat Z_l $, and using trace properties,
+\[
+= \lambda_l^2  \; \underbrace{\norm{\vect x_l}^4}_{=1}\;  + \;  \norm{Z_l}^2_F + \; \underbrace{\norm{\vect \hat x}^4}_{=1} \; - \; 2 \lambda_l \; \vect x_l^T \rdmmat Z_l \vect x_l - 2 \vect \hat x^T \rdmmat Z_l \vect \hat x - 2  \lambda_l \; \big( \; \underbrace{\vect x_l^T \vect \hat x }_{= m_l}  \; \big)^2
+\]
+
+Since the noise and the signals are independant, in the large $n$ limit $\vect x_l^T \rdmmat Z_l \vect x_l \rightarrow 0$ for $l=1,2$.
+\subsection{Naive Method: Expansion of the noise term}\label{an:Naive-Loss}
+
+\paragraph{Step 1: decomposition of the observation.}
+The naive estimator $\hat{\boldsymbol{x}}_{\mathrm{naive}}$ is the top eigenvector of
+\begin{equation}
+  \mathbf{Y} = \alpha\mathbf{Y}_1 + \sqrt{1-\alpha^2}\,\mathbf{Y}_2 = \mathbf{P} + \mathbf{Z},
+  \qquad
+  \mathbf{P} = a\,\boldsymbol{x}_1\boldsymbol{x}_1^\top + b\,\boldsymbol{x}_2\boldsymbol{x}_2^\top,
+  \qquad
+  \mathbf{Z} = \alpha\mathbf{Z}_1 + \sqrt{1-\alpha^2}\,\mathbf{Z}_2,
+\end{equation}
+with $a = \alpha\lambda_1$, $b = \sqrt{1-\alpha^2}\,\lambda_2$ (Eq.~\eqref{eq:2spikes}). Since $\alpha^2 + (1-\alpha^2) = 1$ and
+$\mathbf{Z}_1$, $\mathbf{Z}_2$ are independent GOE matrices, $\mathbf{Z}$ is again a GOE matrix.
+We write $\theta_+$ for the top eigenvalue of $\mathbf{P}$ (Eq.~\eqref{eq:eigenvalue_naive}) and $\boldsymbol{v}$ for the associated eigenvector.
+
+\paragraph{Step 2: total noise.}
+By BBP, $\hat{\boldsymbol{x}}^\top\mathbf{Y}\hat{\boldsymbol{x}} = \theta_+ + \theta_+^{-1}$ (top eigenvalue of $\mathbf{Y}$).
+By Eq.~\eqref{eq:overlap_signal_k-spikes}, $\langle\hat{\boldsymbol{x}},\boldsymbol{v}\rangle^2 = 1-\theta_+^{-2}$, and the rest of $\hat{\boldsymbol{x}}$ is orthogonal to the
+signal subspace, so
+\begin{equation}
+  \hat{\boldsymbol{x}}^\top\mathbf{P}\hat{\boldsymbol{x}} = a\, m_1^2 + b\, m_2^2 = \theta_+\big(1-\theta_+^{-2}\big) = \theta_+ - \frac{1}{\theta_+} .
+  \label{eq:naive_T}
+\end{equation}
+Hence
+\begin{equation}
+  \hat{\boldsymbol{x}}^\top\mathbf{Z}\hat{\boldsymbol{x}}
+  = \hat{\boldsymbol{x}}^\top\mathbf{Y}\hat{\boldsymbol{x}} - \hat{\boldsymbol{x}}^\top\mathbf{P}\hat{\boldsymbol{x}}
+  = \frac{2}{\theta_+} .
+\end{equation}
+
+\paragraph{Step 3: splitting the noise between the two tasks.}
+Define the orthogonal combination
+\begin{equation}
+  \mathbf{Z}' = \sqrt{1-\alpha^2}\,\mathbf{Z}_1 - \alpha\,\mathbf{Z}_2 ,
+  \qquad\text{so that}\qquad
+  \mathbf{Z}_1 = \alpha\,\mathbf{Z} + \sqrt{1-\alpha^2}\,\mathbf{Z}',
+  \quad
+  \mathbf{Z}_2 = \sqrt{1-\alpha^2}\,\mathbf{Z} - \alpha\,\mathbf{Z}' .
+\end{equation}
+$\mathbf{Z}$ and $\mathbf{Z}'$ are jointly Gaussian with zero covariance
+($\alpha\sqrt{1-\alpha^2} - \sqrt{1-\alpha^2}\,\alpha = 0$), hence independent, and $\mathbf{Z}'$ is a GOE matrix.
+The estimator depends on the noise only through $\mathbf{Y} = \mathbf{P} + \mathbf{Z}$, so it is independent of $\mathbf{Z}'$.
+Being delocalised on the eigenvectors of $\mathbf{Z}'$ (as $\boldsymbol{w}$ for Method A),
+\begin{equation}
+  \hat{\boldsymbol{x}}^\top\mathbf{Z}'\hat{\boldsymbol{x}} \;\xrightarrow[n\to\infty]{}\; \int x\,\rho_{sc}(x)\,dx = 0 .
+\end{equation}
+
+\paragraph{Step 4: assembling.}
+\begin{equation}
+  \boxed{\;
+  \varepsilon_1^{\mathrm{naive}} = \hat{\boldsymbol{x}}^\top\mathbf{Z}_1\hat{\boldsymbol{x}} = \frac{2\alpha}{\theta_+},
+  \qquad
+  \varepsilon_2^{\mathrm{naive}} = \hat{\boldsymbol{x}}^\top\mathbf{Z}_2\hat{\boldsymbol{x}} = \frac{2\sqrt{1-\alpha^2}}{\theta_+}
+  \;}
+\end{equation}
+Each task receives the share of the noise given by its weight in $\mathbf{Y}$.
+
+\subsubsection{Final Loss expression}
+Assembling both noise terms with the Loss expression, the total Evaluation Loss for method A is:
+\begin{equation}
+  \mathcal{L}_{naive}(\alpha) = 
+  - 2\Big[\lambda_1 \big(m_1^{naive}\big)^2 + \lambda_2 \big(m_2^{naive}\big)^2  \Big] + \frac{2}{\theta_+}\big( \alpha + \sqrt{1 - \alpha^2} \big) + \mathrm{cst}.
+\end{equation}
+
+\subsection{Method A: Expansion of the noise term}\label{an:A_full_Loss}
+
+The noise terms $\varepsilon_l := \hat{\boldsymbol{x}}_A^\top \mathbf{Z}_l \hat{\boldsymbol{x}}_A$ can be computed explicitly
+for both noises $\mathbf{Z}_1$ and $\mathbf{Z}_2$. We write
+$(c_1, c_2) \equiv (c_1^1, c_2^1)$ (Eq.~\eqref{eq:v_A}), and define
+\begin{equation}
+  s = \sqrt{1-\theta_{max}^{-2}},
+  \qquad
+  q_s := \langle \hat{\boldsymbol{x}}_A, \hat{\boldsymbol{x}}^{(1)}\rangle .
+\end{equation}
+The overlap $q_s$ of the final estimator with the first-step estimator follows from
+$\hat{\boldsymbol{x}}^{(1)} = m_1\boldsymbol{x}_1 + \sqrt{1-m_1^2}\,\boldsymbol{x}_3$ (Eq.~\eqref{eq:x_hat_p1}) and the overlaps of Eq.~\eqref{eq:overlap_A}:
+\begin{equation}
+  q_s = m_1\, m_1^A + \sqrt{1-m_1^2}\; m_3^A
+      = s\,\big(m_1^2 c_1 + m_1\rho\, c_2\big) + s\,(1-m_1^2)\, c_1
+      = s\,\big(c_1 + m_1\rho\, c_2\big).
+  \label{eq:qs}
+\end{equation}
+It does not reduce to $m_1 m_1^A$: through the Fisher penalty, $\hat{\boldsymbol{x}}_A$ inherits a component $m_3^A$
+along the step-1 error $\boldsymbol{x}_3$.
+
+\subsubsection{Task 2}
+
+\paragraph{Step 1: eigenvalue equation.}
+$\hat{\boldsymbol{x}}_A$ is the top eigenvector of
+\begin{equation}
+  \mathbf{A} = \mathbf{Y}_2 - \mathbf{I} + \Lambda\, \hat{\boldsymbol{x}}^{(1)}\hat{\boldsymbol{x}}^{(1)\top} ,
+  \qquad
+  \Lambda = 2\mu_R(\lambda_1-1)^2 ,
+\end{equation}
+associated with the eigenvalue (Eq.~\eqref{eq:top_eigenvalue_A})
+\begin{equation}
+  \lambda^{\mathrm{out}}_{\max} = \theta_{\max} + \frac{1}{\theta_{\max}} - 1 .
+\end{equation}
+
+\paragraph{Step 2: quadratic form with $\mathbf{Y}_2$.}
+Since $\hat{\boldsymbol{x}}_A$ is a unit eigenvector of $\mathbf{A}$,
+$\hat{\boldsymbol{x}}_A^\top \mathbf{A}\, \hat{\boldsymbol{x}}_A = \lambda^{\mathrm{out}}_{\max}$. Expanding the left-hand side,
+\begin{equation}
+  \hat{\boldsymbol{x}}_A^\top \mathbf{A}\, \hat{\boldsymbol{x}}_A
+  = \hat{\boldsymbol{x}}_A^\top \mathbf{Y}_2 \hat{\boldsymbol{x}}_A - 1 + \Lambda\, q_s^2 ,
+\end{equation}
+ and
+\begin{equation}
+  \hat{\boldsymbol{x}}_A^\top \mathbf{Y}_2 \hat{\boldsymbol{x}}_A = \theta_{\max} + \frac{1}{\theta_{\max}} - \Lambda\, q_s^2 .
+  \label{eq:xAY2xA}
+\end{equation}
+
+\paragraph{Step 3: noise term.}
+With $\mathbf{Z}_2 = \mathbf{Y}_2 - \lambda_2\boldsymbol{x}_2\boldsymbol{x}_2^\top$,
+\begin{equation}
+  \varepsilon_2
+  = \hat{\boldsymbol{x}}_A^\top \mathbf{Z}_2 \hat{\boldsymbol{x}}_A
+  = \theta_{\max} + \frac{1}{\theta_{\max}} - \Lambda\, q_s^2 - \lambda_2 \big(m_2^A\big)^2 .
+  \label{eq:eps2}
+\end{equation}
+
+\paragraph{Step 4: simplified form.}
+The signal part of $\mathbf{A}$ is $\rdmmat P_A = \lambda_2\boldsymbol{x}_2\boldsymbol{x}_2^\top + \Lambda\hat{\boldsymbol{x}}^{(1)}\hat{\boldsymbol{x}}^{(1)\top}$,
+with top eigenvalue $\theta$. Since $\hat{\boldsymbol{x}}^{(1)}$ is independent of $\mathbf{Z}_2$, the BBP result gives
+$\hat{\boldsymbol{x}}_A^\top \rdmmat _A \hat{\boldsymbol{x}}_A = \theta\, s^2 = \theta - \theta^{-1}$, i.e.
+\begin{equation}
+  \lambda_2 \big(m_2^A\big)^2 + \Lambda\, q_s^2 = \theta_{\max} - \frac{1}{\theta_{\max}} .
+\end{equation}
+Inserting it into Eq.~\eqref{eq:eps2},
+\begin{equation}
+  \boxed{\;
+  \varepsilon_2 = \hat{\boldsymbol{x}}_A^\top \mathbf{Z}_2 \hat{\boldsymbol{x}}_A
+  = \frac{2}{\theta_{\max}}
+  \;}
+  \label{eq:eps2_final}
+\end{equation}
+where the last form only involves the overlaps $m_2^A$ and $q_s$.
+The noise of task 2 decreases as the top eigenvalue $\theta_{\max}$ grows, i.e.\ as the outlier of $\mathbf{A}$ separates from the bulk.
+\paragraph{Task 1.}
+\subsubsection{Task 1}
+
+\paragraph{Step 1: decompositions.}
+The noise of the first observation is
+\begin{equation}
+  \mathbf{Z}_1 = \mathbf{Y}_1 - \lambda_1 \boldsymbol{x}_1\boldsymbol{x}_1^\top,
+  \qquad
+  \varepsilon_1 := \hat{\boldsymbol{x}}_A^\top \mathbf{Z}_1 \hat{\boldsymbol{x}}_A
+  = \hat{\boldsymbol{x}}_A^\top \mathbf{Y}_1 \hat{\boldsymbol{x}}_A - \lambda_1 \big(m_1^A\big)^2 .
+  \label{eq:eps1_def}
+\end{equation}
+
+\emph{Observation 1.} We expand $\mathbf{Y}_1$ in its orthonormal eigenbasis, separating the outlier from the bulk:
+\begin{equation}
+  \mathbf{Y}_1 = \theta^{(1)}\, \hat{\boldsymbol{x}}^{(1)}\hat{\boldsymbol{x}}^{(1)\top} + \mathcal{B},
+  \qquad
+  \mathcal{B} = \sum_{j\geq 2} \gamma_j\, \boldsymbol{u}_j\boldsymbol{u}_j^\top,
+  \qquad
+  \theta^{(1)} = \lambda_1 + \frac{1}{\lambda_1},
+  \label{eq:Y1_expansion}
+\end{equation}
+where $\hat{\boldsymbol{x}}^{(1)}$ is the top eigenvector (Eq.~\eqref{eq:lambda_max_Y1}), the $\boldsymbol{u}_j$ are the bulk eigenvectors,
+$\gamma_j \in [-2, 2]$, and $\mathcal{B}\,\hat{\boldsymbol{x}}^{(1)} = 0$.
+
+\emph{Signal 1.} The top eigenvector only captures a fraction $m_1 = \sqrt{1-\lambda_1^{-2}}$ of $\boldsymbol{x}_1$.
+We write
+\begin{equation}
+  \boldsymbol{x}_1 = m_1\, \hat{\boldsymbol{x}}^{(1)} + \sqrt{1-m_1^2}\; \bar{\boldsymbol{x}}_1,
+  \qquad
+  \bar{\boldsymbol{x}}_1 := \frac{\boldsymbol{x}_1 - m_1 \hat{\boldsymbol{x}}^{(1)}}{\sqrt{1-m_1^2}}
+  = \sqrt{1-m_1^2}\,\boldsymbol{x}_1 - m_1 \boldsymbol{x}_3 ,
+  \label{eq:x1_expansion}
+\end{equation}
+where the last equality uses $\hat{\boldsymbol{x}}^{(1)} = m_1\boldsymbol{x}_1 + \sqrt{1-m_1^2}\,\boldsymbol{x}_3$ (Eq.~\eqref{eq:x_hat_p1}).
+The vector $\bar{\boldsymbol{x}}_1$ is the part of $\boldsymbol{x}_1$ that step 1 did not recover:
+$\|\bar{\boldsymbol{x}}_1\| = 1$, $\bar{\boldsymbol{x}}_1 \perp \hat{\boldsymbol{x}}^{(1)}$, so $\bar{\boldsymbol{x}}_1$ lives in the bulk of $\mathbf{Y}_1$.
+
+\emph{Estimator.} In the same basis, with $\boldsymbol{w} \perp \hat{\boldsymbol{x}}^{(1)}, \bar{\boldsymbol{x}}_1$,
+\begin{equation}
+  \hat{\boldsymbol{x}}_A = q_s\, \hat{\boldsymbol{x}}^{(1)} + \beta\, \bar{\boldsymbol{x}}_1 + \boldsymbol{w},
+  \qquad
+  q_s = \langle \hat{\boldsymbol{x}}_A, \hat{\boldsymbol{x}}^{(1)}\rangle = m_1 m_1^A + \sqrt{1-m_1^2}\, m_3^A,
+  \qquad
+  \beta = \langle \hat{\boldsymbol{x}}_A, \bar{\boldsymbol{x}}_1\rangle = \sqrt{1-m_1^2}\, m_1^A - m_1 m_3^A .
+  \label{eq:xA_expansion}
+\end{equation}
+With the overlaps of Eq.~\eqref{eq:overlap_A}, $q_s = \sqrt{1-\theta_{\max}^{-2}}\,(c_1^1 + m_1\rho\, c_2^1)$ and
+$\beta = \sqrt{1-\theta_{\max}^{-2}}\;\rho\, c_2^1/\lambda_1$.
+The remainder $\boldsymbol{w}$ is independent of $\mathbf{Z}_1$.
+
+\paragraph{Step 2: quadratic form with $\mathbf{Y}_1$.}
+Inserting Eqs.~\eqref{eq:Y1_expansion} and \eqref{eq:xA_expansion}, and using $\mathcal{B}\hat{\boldsymbol{x}}^{(1)} = 0$,
+\begin{equation}
+  \hat{\boldsymbol{x}}_A^\top \mathbf{Y}_1 \hat{\boldsymbol{x}}_A
+  = \theta^{(1)} q_s^2
+  + \beta^2\, \bar{\boldsymbol{x}}_1^\top \mathcal{B}\, \bar{\boldsymbol{x}}_1
+  + 2\beta\, \bar{\boldsymbol{x}}_1^\top \mathcal{B}\, \boldsymbol{w}
+  + \boldsymbol{w}^\top \mathcal{B}\, \boldsymbol{w} .
+\end{equation}
+The last two terms vanish as $n\to\infty$. Since $\mathbf{Z}_1$ is a GOE matrix, its eigenvectors are uniformly
+distributed on the sphere, independently of its eigenvalues. A vector $\boldsymbol{w}$ independent of $\mathbf{Z}_1$
+is therefore delocalised on the bulk, $\langle \boldsymbol{w}, \boldsymbol{u}_j\rangle^2 \simeq \|\boldsymbol{w}\|^2/n$, and
+\begin{equation}
+  \boldsymbol{w}^\top \mathcal{B}\, \boldsymbol{w}
+  = \sum_{j} \gamma_j \langle \boldsymbol{w}, \boldsymbol{u}_j\rangle^2
+  \;\xrightarrow[n\to\infty]{}\; \|\boldsymbol{w}\|^2 \int x\, \rho_{sc}(x)\, dx = 0 ,
+  \qquad
+  \bar{\boldsymbol{x}}_1^\top \mathcal{B}\, \boldsymbol{w} \;\xrightarrow[n\to\infty]{}\; 0 ,
+\end{equation}
+the second because the signs of $\langle \boldsymbol{w}, \boldsymbol{u}_j\rangle$ are independent of $\bar{\boldsymbol{x}}_1$. Thus
+\begin{equation}
+  \hat{\boldsymbol{x}}_A^\top \mathbf{Y}_1 \hat{\boldsymbol{x}}_A
+  = \theta^{(1)} q_s^2 + \beta^2\, \bar{\boldsymbol{x}}_1^\top \mathcal{B}\, \bar{\boldsymbol{x}}_1 .
+  \label{eq:xAY1xA}
+\end{equation}
+
+\paragraph{Step 3: the missing term $\bar{\boldsymbol{x}}_1^\top \mathcal{B}\, \bar{\boldsymbol{x}}_1$.}
+Unlike $\boldsymbol{w}$, the vector $\bar{\boldsymbol{x}}_1$ is built from $\mathbf{Z}_1$ (through $\hat{\boldsymbol{x}}^{(1)}$) and is
+concentrated on the bulk eigenvectors close to the upper edge, so its quadratic form does not vanish.
+It follows from $\boldsymbol{x}_1$ itself, which is independent of $\mathbf{Z}_1$:
+\begin{equation}
+  \boldsymbol{x}_1^\top \mathbf{Y}_1 \boldsymbol{x}_1 = \lambda_1 + \boldsymbol{x}_1^\top \mathbf{Z}_1 \boldsymbol{x}_1
+  \;\xrightarrow[n\to\infty]{}\; \lambda_1 .
+\end{equation}
+On the other hand, by Eqs.~\eqref{eq:Y1_expansion} and \eqref{eq:x1_expansion},
+\begin{equation}
+  \boldsymbol{x}_1^\top \mathbf{Y}_1 \boldsymbol{x}_1
+  = \theta^{(1)} m_1^2 + (1-m_1^2)\, \bar{\boldsymbol{x}}_1^\top \mathcal{B}\, \bar{\boldsymbol{x}}_1
+  = \lambda_1 - \frac{1}{\lambda_1^3} + \frac{1}{\lambda_1^2}\, \bar{\boldsymbol{x}}_1^\top \mathcal{B}\, \bar{\boldsymbol{x}}_1 ,
+\end{equation}
+using $\theta^{(1)} m_1^2 = (\lambda_1 + \lambda_1^{-1})(1 - \lambda_1^{-2})$ and $1 - m_1^2 = \lambda_1^{-2}$. Equating both expressions,
+\begin{equation}
+  \bar{\boldsymbol{x}}_1^\top \mathcal{B}\, \bar{\boldsymbol{x}}_1 = \frac{1}{\lambda_1} .
+  \label{eq:xbarBxbar}
+\end{equation}
+
+\paragraph{Step 4: assembling.}
+Inserting Eq.~\eqref{eq:xbarBxbar} into Eq.~\eqref{eq:xAY1xA} and then into Eq.~\eqref{eq:eps1_def},
+\begin{equation}
+  \varepsilon_1
+  = \Big(\lambda_1 + \frac{1}{\lambda_1}\Big) q_s^2 + \frac{\beta^2}{\lambda_1} - \lambda_1 \big(m_1^A\big)^2 .
+\end{equation}
+With $\beta = \lambda_1 (m_1^A - m_1 q_s)$ (from Eq.~\eqref{eq:x1_expansion}, since $\sqrt{1-m_1^2} = \lambda_1^{-1}$)
+and $\lambda_1 m_1^2 = \lambda_1 - \lambda_1^{-1}$, all the $\lambda_1^{-1}$ terms cancel and
+\begin{equation}
+  \boxed{\;
+  \varepsilon_1 = \hat{\boldsymbol{x}}_A^\top \mathbf{Z}_1 \hat{\boldsymbol{x}}_A
+  = 2\lambda_1\, q_s\big(q_s - m_1 m_1^A\big)
+  = 2\, q_s\, m_3^A
+  \;}
+  \label{eq:eps1_final}
+\end{equation}
+where the last form uses $q_s - m_1 m_1^A = \sqrt{1-m_1^2}\, m_3^A = m_3^A/\lambda_1$.
+The noise of task 1 is thus seen by $\hat{\boldsymbol{x}}_A$ only through its component $m_3^A$ along the step-1 error $\boldsymbol{x}_3$.
+
+\subsubsection{Final Loss expression}
+Assembling both noise terms with the Loss expression, the total Evaluation Loss for method A is:
+\begin{equation}
+  \mathcal{L}_{\mathrm{eval}}(\mu_R) = 
+  - 2\Big[\lambda_1 \big(m_1^A\big)^2 + \lambda_2 \big(m_2^A\big)^2  \Big] + 2\, q_s\, m_3^A + \frac{2}{\theta_{max}}+ \mathrm{cst}.
+\end{equation}
+
+
+\section{EWC: Fisher matrix and stationarity condition}
+
+\subsection{Derivation of the Fisher matrix}\label{adix:fisher}
+
+We consider a single task, $\vect Y = \lambda\,\vect x\vect x^\top + \vect W$ (for the first task of Section~\ref{sec:ewc}, $\lambda = \lambda_1$), with the misspecified loss
+\[
+    \mathcal{L}(\vect{x}) = -\tfrac{1}{4} \|\vect Y - \vect{x}\vect{x}^\top\|_F^2 .
+\]
+Its gradient is
+\[
+    \vect \nabla_x \mathcal{L}(\vect{x}) = (\vect Y - \vect{x} \vect{x}^\top) \vect{x} = \vect Z\vect{x},
+    \qquad \vect Z := \vect Y - \vect{x} \vect{x}^\top ,
+\]
+so that, since $\vect Z^\top = \vect Z$,
+\[
+    \vect \nabla_x \mathcal{L}(\vect{x}) \vect \nabla_x \mathcal{L}(\vect{x})^\top = \vect Z \vect{x}\vect{x}^\top \vect Z ,
+    \qquad
+    \mathcal{F}_{\mathrm{MS}}(\vect{x}) = \mathbb{E}[\vect Z \vect{x}\vect{x}^\top \vect Z] .
+\]
+With $\vect Z = (\lambda - 1) \vect{x} \vect{x}^\top + \vect W$, where $\vect W$ is the bulk of the noise, a symmetric Gaussian Wigner matrix with $\mathbb{E}[W_{ij}]=0$ and $\mathbb{E}[W_{ij}^2]=\sigma^2=\frac{1}{n}$, the cross terms vanish and
+\[
+\mathbb{E} [\vect Z \vect{x} \vect{x}^\top \vect Z] = (\lambda - 1)^2 \vect{x} \vect{x}^\top + \mathbb{E}[\vect W \vect{x} \vect{x}^\top \vect W] .
+\]
+\begin{property} \label{prop:wigner_expectation}
+\[
+    \mathbb{E}[\vect W \vect A \vect W] = \sigma^2(\mathrm{Tr}(\vect A) \vect I + \vect A^\top).
+\]
+\end{property}
+\noindent
+Applying Prop.~\ref{prop:wigner_expectation} to $\vect A = \vect{x} \vect{x}^\top$ with $\|\vect{x}\| = 1$, i.e.\ $\mathrm{Tr}(\vect A) = 1$ and $\vect A^\top = \vect A$,
+\[
+\mathbb{E}[\vect W \vect{x} \vect{x}^\top \vect W] = \frac{1}{n}(\vect I + \vect{x} \vect{x}^\top),
+\]
+which gives the Fisher matrix used in Section~\ref{sec:ewc}:
+\begin{equation}
+    \mathcal{F}_{\mathrm{MS}}(\vect{x}) = (\lambda-1)^2\vect{x}\vect{x}^\top + \frac{1}{n}(\vect I + \vect{x} \vect{x}^\top) .
+    \label{eq:fisher_ms}
+\end{equation}
+
+\subsection{Derivation of the EWC stationarity condition}\label{adix:ewc}
+With the misspecified losses $\mathcal{L}_{i,\mathrm{MS}}(\vect{x}) = -\tfrac{1}{4} \|\vect Y_i - \vect{x}\vect{x}^\top\|_F^2$, of gradient $\vect \nabla \mathcal{L}_{i,\mathrm{MS}}(\vect{x}) = (\vect Y_i - \vect{x}\vect{x}^\top) \vect{x}$, the EWC loss is
+\[
+    \mathcal L_{\mathrm{EWC}}(\vect{x}) = \mathcal{L}_{2,\mathrm{MS}}(\vect{x}) +
+    \mu_R (\vect{x} - \hat{\vect{x}}^{(1)})^\top \vect F_1(\vect{x} - \hat{\vect{x}}^{(1)}),
+\]
+with $\hat{\vect{x}}^{(1)}$ the optimizer of $\mathcal{L}_{1,\mathrm{MS}}$ on the first task only. Using $\vect F_1^\top=\vect F_1$,
+\[
+    \vect \nabla \mathcal L_{\mathrm{EWC}}(\vect{x})= (\vect Y_2 - \vect{x} \vect{x}^\top) \vect{x}+2\mu_R \vect F_1(\vect{x} - \hat{\vect x}^{(1)}) .
+\]
+We substitute $\|\vect{x}\|^2 = 1$ directly into the gradient (rather than enforcing it through a Lagrange multiplier at this stage), which linearises the stationarity condition in $\vect{x}$. The constraint is re-imposed afterwards through the Lagrange multiplier of Eq.~\eqref{eq:final_estimator_lagrange}. The gradient becomes
+\[
+ \vect \nabla \mathcal L_{\mathrm{EWC}}(\vect{x})= (\vect Y_2 - \vect I) \vect{x}+2\mu_R \vect F_1(\vect{x} - \hat{\vect x}^{(1)}),
+\]
+and the Hessian is
+\[
+    \mathcal{H}_{\mathrm{EWC}} = \vect \nabla \vect \nabla ^\top \mathcal{L}_{\mathrm{EWC}} = \vect Y_2 - \vect I  + 2 \mu_R \vect F_1 .
+\]
+The stationarity condition $\vect \nabla \mathcal L_{\mathrm{EWC}}(\vect{x})= 0$ then reads
+\[
+(\vect Y_2 - \vect I + 2 \mu_R \vect F_1) \vect{x}=2 \mu_R\vect F_1\hat{\vect x}^{(1)},
+\]
+which is the affine system $\vect A \vect{x} = \vect b$ of Eq.~\eqref{eq:stationary_condition}, with $\vect A = \mathcal{H}_{\mathrm{EWC}}$. Whenever $\vect A$ is invertible, it is solved by
+\[
+    \hat{\vect{x}}^{(2)} = \vect A^{-1}\vect b = 2\mu_R\,\vect R_{\vect A}(0)\,\vect F_1 \hat{\vect x}^{(1)},
+\]
+with $\vect R_{\vect A}(z) = (\vect A - z\vect I)^{-1}$ the resolvent of $\vect A$, as in Section~\ref{sec:ewc}.

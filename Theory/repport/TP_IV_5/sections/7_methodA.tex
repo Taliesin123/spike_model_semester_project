@@ -1,0 +1,628 @@
+\section{EWC-inspired methods: context, past semester work}\label{sec:ewc}
+Continual learning is \emph{sequential}: a first task is learned, then a new one arrives, and the estimator should be updated without forgetting the first. This is the philosophy of Elastic Weight Consolidation (EWC). We first process task~$1$ alone, taking as first-stage estimator $\hat{\vect x}^{(1)}$ the minimiser of the misspecified loss $\mathcal L_{1,\mathrm{MS}}(\vect x) = -\tfrac14\norm{\vect Y_1 - \vect x\vect x^\top}_F^2$, which is essentially the top eigenvector of $\vect Y_1$. When task~$2$ is observed, we minimise its loss plus a quadratic penalty that keeps the new estimator close to $\hat{\vect x}^{(1)}$ along the directions that matter for task~$1$.
+These directions are encoded by the Fisher matrix $\mathcal F(\vect x) = \mathbb E[\nabla\mathcal L(\vect x)\nabla\mathcal L(\vect x)^\top]$. For the misspecified loss it has the closed form (Appendix~\ref{adix:fisher})
+\[
+    \mathcal F_{\mathrm{MS}}(\vect x) = (\lambda_1 - 1)^2\vect x\vect x^\top + \tfrac1n(\vect I + \vect x\vect x^\top).
+\]
+As in standard EWC, it is evaluated at the end of the first stage, $\vect F_1 := \mathcal F_{\mathrm{MS}}(\hat{\vect x}^{(1)})$, and then frozen while task~$2$ is optimised. The EWC loss reads
+\[
+    \mathcal L_{\mathrm{EWC}}(\vect x) = -\tfrac14\norm{\vect Y_2 - \vect x\vect x^\top}_F^2 
+    + \mu_R\,(\vect x - \hat{\vect x}^{(1)})^\top \vect F_1 (\vect x - \hat{\vect x}^{(1)}),
+    \qquad \mu_R \ge 0.
+\]
+Imposing stationarity under the constraint $\norm{\vect x}^2 = 1$ and linearising (Appendix~\ref{adix:ewc}) gives the affine system
+\begin{equation}
+    \vect A\vect x = \vect b, \qquad
+    \vect A = \vect Y_2 + 2\mu_R \vect F_1 - \vect I, \qquad
+    \vect b = 2\mu_R \vect F_1 \hat{\vect x}^{(1)}, \qquad
+    \label{eq:stationary_condition}
+\end{equation}
+where $\vect A$ is also the Hessian $\mathcal H_{\mathrm{EWC}}$ of the EWC loss. Unlike the multi-task losses, this equation is affine rather than homogeneous, so it is not directly an eigenvector problem. We consider two estimators:
+\begin{itemize}
+    \item \textbf{Method A (spectral).} Drop $\vect b$ and take
+    $\hat{\vect x}^{(2)}_A = \operatorname{top-eigenvector}(\vect A)$, which has unit norm by construction.
+    \item \textbf{Method B (resolvent).} Solve~\eqref{eq:stationary_condition} directly:
+        $\hat{\vect x}^{(2)}_B = 2\mu_R\,\vect R_{\vect A}(0)\,\vect F_1 \hat{\vect x}^{(1)}$,
+    where $\vect R_{\vect A}(z) = (\vect A - z\vect I)^{-1}$ is the resolvent of $\vect A$.
+\end{itemize}
+
+In practice $\mathcal H_{\mathrm{EWC}}$ has near-zero eigenvalues, so $\vect A$ is numerically singular. To enforce $\norm{\vect x} = 1$ exactly, we add a Lagrange multiplier $\lambda$ for $g(\vect x) = \norm{\vect x}^2 - 1$. The $\vect x$-stationarity condition becomes $\bigl(\vect A - \lambda\vect I\bigr)\vect x = \vect b$. So $\lambda$ acts as a spectral shift, moving the evaluation point of the resolvent of $\vect A$ from $z=0$ to $z=\lambda$, which regularises the inversion:
+\begin{equation}
+    \boxed{\hat{\vect x}^{(2)}(\lambda) = 2\mu_R\,\vect R_{\vect A}(\lambda)\,\vect F_1 \hat{\vect x}^{(1)}},
+    \qquad \text{with $\lambda$ fixed by } \norm{\hat{\vect x}^{(2)}(\lambda)} = 1.
+    \label{eq:final_estimator_lagrange}
+\end{equation}
+
+\paragraph{Focus of this report.}
+Both estimators are governed by the same matrix $\vect A = \mathcal H_{\mathrm{EWC}} = \vect Y_2 - \vect I + 2\mu_R\vect F_1$. Method~A uses its top eigenvector, and Method~B (with or without the Lagrange shift) uses its resolvent. Whether these estimators recover the signals therefore depends on the spectrum of $\vect A$: its outlier eigenvalues, the alignment of the corresponding eigenvectors with $\vect x_1$ and $\vect x_2$, and how close its eigenvalues come to zero. The rest of this report studies $\vect A$.\\
+
+\begin{comment}
+
+
+\section{First Step}
+
+IDEE DE PLAN/TRAJECTOIRE (à partir de la section 6 pour avoir la vision):
+\begin{itemize}
+    \item 1- \textbf{Comment on a crée/ quelles sont nos méthode EWC :} On pose notre Loss EWC (inspiré du paper) -> methodes découlant de cette loss: méthode A et B (bien appuyer sur sequentialité step 1 puis step 2) 
+    
+    \item 2- \textbf{Step 1:} overlap $m_1$, transition $\lambda_1 >1$, formulation théorique de notre estimateur (garder uniquement $\hat x^{(1)}_{P_1}$ les autres en annexe peut etre)
+    
+    \item 3- \textbf{En préparation du Step 2:} Etude de la matrice Hessienne A évalué en $\hat x^{(1)}_{P_1}$: 
+    
+    Eigenvalues, transition, overlaps avec signaux
+    
+    (motivation: elle est centrale dans nos deux méthodes étant donné que c'est la Hessienne de notre Loss)
+    \textit{Ici on ne parle pas encore d'estimateur du step 2, uniquement d'eigenvalue et eigenvector}
+
+    \item 4- \textbf{Methode A:}
+    Estimateur final au Step 2: 
+    
+    top(A), condition pour retrouver le signal ($\theta_{max}>1$), overlapp avec les deux signaux
+
+    \item 5- \textbf{Methdode B:}
+    Estimateur final: ecrire l'expression dans la base de A, condition pour retrouver le signal ($\theta_{max}>1$ au moins 1 spike qui sort du bulk -> au moins un overlap non nul), overlapp avec les deux signaux
+
+\end{itemize}
+
+Recover the first signal $\vect{x_1}$ Let us define our fist-step estimator $\hat{\vect x}^{(1)}$ as the top eigenvector of the first observaation $\rdmmat Y_1 = \lambda_1 \vect x_1 \vect x_1 ^T + \rdmmat Z_1$ 
+\subsection{Ideal case: complete recovery}
+We consider that in the first step our estimator of the signal completely recovers it.
+For the approximation of a perfect recovery of the first signal ($ \hat{\vect x}^{(1)} = \vect x_1$), the Hessian is of the form $\rdmmat A = \rdmmat P + \rdmmat W + c \rdmmat I_n$ where:
+\[
+\begin{cases}
+    \rdmmat P = a \vect x_1 \vect x_1^T + b \vect x_2 \vect x_2^T \qquad \text{with} \quad a = 2\mu_R \Big((\lambda_1-1)^2 + \frac{1}{n} \Big) > 0, \quad b = \lambda_2 \\
+    \rdmmat W = \rdmmat Z _2\\
+    c = \Big(\frac{2\mu_R}{n} - 1 \Big) 
+\end{cases}
+\]
+The recovery transitions are then given by the general results of section \ref{sec:general_results}.
+
+\subsection{Non-Ideal case: partial recovery}
+We consider a way to approximate the first step estimator $\hat{\vect x}^{(1)}$.
+
+\subsubsection{Estimation via first time step overlap}
+The first time step overlap with the signal $m_1$, represents the recovered fraction of the signal $\vect x_1$. An possible approximation of our estimator is then:
+
+\begin{equation}
+\boxed{\;
+    \hat{\vect x}^{(1)}_{m_1} = m_1 \vect x_1\;
+    }
+    \label{eq:x_hat_m1}
+\end{equation}
+Then as for the perfect recovery, the Hessian is of the form $\rdmmat A = \rdmmat P + \rdmmat W + c \rdmmat I_n$.
+The recovery transitions are then given by Eq. \ref{eq:BBP_overlap_k_spikes} and Eq. \ref{eq:BBP-k-spikes}, with $k=2$ and the parameters:
+\[
+\begin{cases}
+     a = 2\mu_R \Big((\lambda_1-1)^2 + \frac{1}{n} \Big) m_1^2  \\
+     b = \lambda_2 \\
+    c = \Big(\frac{2\mu_R}{n} - 1 \Big) 
+\end{cases}
+\]
+
+\subsubsection{Estimation with an orthogonal projector of the signal}
+A more complete way to approximate our estimator is to also consider the not recovered part of our signal. Considering a rank one spike $\vect g \in \R^n$ with $g_i \sim \mathcal{N}( 0, 1)$, project on the orthogonal subspace of the signal $\vect x_1$, the estimator can be approximate by:
+\begin{equation}
+\boxed{
+    \hat{\; \vect x}^{(1)}_{P_1} = m_1 \vect x_1 + \sqrt{1 - m_1 ^2} \frac{\rdmmat P_{\perp x_1}\vect g}{\norm{P_{\perp x_1}\vect g}} \;} \quad \text{with} \quad \rdmmat P_{\perp x_1} = \rdmmat I - \vect x_1 \vect x_1^\top
+    \label{eq:x_hat_p1}
+\end{equation}
+defining a rotated spike $\vect x_3 = \frac{\rdmmat P_{\perp x_1}\vect g}{\norm{P_{\perp x_1}\vect g}} $, the Hessian matrix $\rdmmat A$ is given, as before, by $ \rdmmat A = \rdmmat P + \rdmmat W + c \rdmmat I_n$ with:
+\[
+\rdmmat P = \alpha_{11} \vect x_1 \vect x_1^T + \alpha_{22} \vect x_2 \vect x_2^T + \alpha_{33} \vect x_3 \vect x_3^T + \alpha_{13}\big( \vect x_1 \vect x_3^T + \vect x_3 \vect x_1^T \big)
+\]
+and the coefficients:
+\[
+\begin{cases}
+     \alpha_{11} = 2\mu_R \Big((\lambda_1-1)^2 + \frac{1}{n} \Big) m_1^2  \\
+     \alpha_{22} = \lambda_2 \\
+     \alpha_{33} = 2\mu_R \Big((\lambda_1-1)^2 + \frac{1}{n} \Big)(1 -m_1^2) \\
+     \alpha_{13} = 2\mu_R \Big((\lambda_1-1)^2 + \frac{1}{n} \Big) m_1 \sqrt{1- m_1^2}
+\end{cases}
+\]
+The orthonormal basis of $(\vect e_1, \vect e_2, \vect e_3)$ of $\rdmmat P$ is:
+\[
+\begin{cases}
+    \vect x_1 = \vect e_1 \\
+    \vect x_2 = \rho \vect e_1 + \Tilde{\rho} \vect e_3 + \sqrt{1 - \rho^2 - \Tilde{\rho}^2} \vect e_2 \\
+    \vect x_3 = \vect e_3
+\end{cases}
+\]
+Where $\rho$ is the imposed correlation between signal 1 and signal 2 ($\lvert \langle \vect x_1, \vect x_2 \rangle \rvert \xrightarrow[n\to\infty]{\text{a.s.}} \rho $) and $\Tilde{\rho}$ is the induced correlation between the second signal and our created third spike ($\lvert \langle \vect x_2, \vect x_3 \rangle \rvert = \Tilde{\rho} \rangle \rvert \approx \frac{1}{\sqrt n} \xrightarrow[n\to\infty]{\text{a.s.}} 0$).
+In this basis, the matrix $\rdmmat P$ is then:
+\begin{comment}
+\[
+\begin{aligned}
+\rdmmat{P} = &{}
+(\alpha_{11}+\alpha_{22}\rho^2)\,
+\vect e_1 \vect e_1^T
++\alpha_{22}(1-\rho^2-\widetilde{\rho}^{\,2})\,
+\vect e_2 \vect e_2^T
+ +(\alpha_{33}+\alpha_{22}\widetilde{\rho}^{\,2})\,
+\vect e_3 \vect e_3^T
+\\
+&+\alpha_{22}\rho\sqrt{1-\rho^2-\widetilde{\rho}^{\,2}}\,
+\left(\vect e_1 \vect e_2^T+\vect e_2 \vect e_1^T\right)
++(\alpha_{13}+\alpha_{22}\rho\widetilde{\rho})\,
+\left(\vect e_1 \vect e_3^T+\vect e_3 \vect e_1^T\right)
++\alpha_{22}\widetilde{\rho}\sqrt{1-\rho^2-\widetilde{\rho}^{\,2}}\,
+\left(\vect e_2 \vect e_3^T+\vect e_3 \vect e_2^T\right). 
+\end{aligned}
+\]
+Leading to:
+
+\[ 
+\rdmmat P =  \sum_{i,j = 1}^3 \beta_{ij} \vect e_i \vect e_j^T
+\]
+where the coefficients $\beta_{ij} \equiv \beta_{ij}(\lambda_1, m_1, \lambda_2, \mu_R,\rho, \Tilde{\rho})$ are given in the annex table \ref{tab:coefficients_beta_A(xP1)}.
+\paragraph{Remark} As the third spike $\vect x_3$ has no preferred direction except it's orthogonality with $\vect x_1$, for $n$ large enough, it's overlap with the second signal $\vect x_2$ tend to zero.
+\[
+    \Tilde{\rho}= \lvert \langle \vect x_2, \vect x_3 \rangle \rvert \approx \frac{1}{\sqrt n} \xrightarrow[n\to\infty]{\text{a.s.}} 0
+\]
+In the limit $\widetilde{\rho}\to 0$, the matrix
+Let \(\rdmmat B\) be the real symmetric matrix
+\[
+\rdmmat B=
+\begin{pmatrix}
+\beta_{11}&\beta_{12}&\beta_{13}\\
+\beta_{12}&\beta_{22}& 0\\
+\beta_{13}& 0 &\beta_{33}
+\end{pmatrix}.
+\]
+has entries detailed in T\ref{truc}. And it's top eigenvalue is:
+
+\[
+\begin{aligned}
+\beta_{11}&=\alpha_{11}+\alpha_{22}\rho^2, &
+\beta_{22}&=\alpha_{22}(1-\rho^2), &
+\beta_{33}&=\alpha_{33},\\
+\beta_{12}&=\alpha_{22}\,\rho\sqrt{1-\rho^2}, &
+\beta_{13}&=\alpha_{13}, &
+\beta_{23}&=0 .
+\end{aligned}
+\]
+Its eigenvalues are denoted $\theta_1\geq\theta_2\geq\theta_3$.
+
+\paragraph{Top eigenvalue.}
+Let
+\[
+T=\beta_{11}+\beta_{22}+\beta_{33},\qquad
+Q=\beta_{11}\beta_{22}+\beta_{11}\beta_{33}+\beta_{22}\beta_{33}
+-\beta_{12}^2-\beta_{13}^2,
+\]
+\[
+D=\beta_{11}\beta_{22}\beta_{33}-\beta_{22}\beta_{13}^2-\beta_{33}\beta_{12}^2,
+\qquad \Delta=T^2-3Q>0 .
+\]
+\[
+\boxed{
+\theta_1=\frac{T}{3}+\frac{2\sqrt{\Delta}}{3}
+\cos\!\left(\frac13\arccos\!\left(\frac{2T^3-9TQ+27D}{2\Delta^{3/2}}\right)\right).
+}
+\]
+Details of the computation in \ref{true}.
+
+    
+\end{comment}
+
+
+\section{Step 1}
+The aim of the first step is to find an estimator for our first signal $\vect x_1$ only.
+Let us define our fist-step estimator $\hat{\vect x}^{(1)}$ as the top eigenvector of the first observaation $\rdmmat Y_1 = \lambda_1 \vect x_1 \vect x_1 ^T + \rdmmat Z_1$ 
+From the BBP theorem \ref{thm:bbp}, we have:
+\begin{align}
+\label{eq:lambda_max_Y1}
+\lambda_{\max}(Y)\xrightarrow{\mathrm{a.s.}}
+\begin{cases}
+2 & \text{if } \lambda_1 \le 1,\\[0.3em]
+\lambda_1+\lambda_1^{-1} & \text{if } \lambda_1 > 1,
+\end{cases}
+\end{align}
+and the overlap between our firs signal $\vect x_1$ and our estimator and is
+\begin{align}
+    m_1 := \begin{cases}
+        0 & \text{if } \lambda_1 \le 1,\\[0.3em]
+        \sqrt{1-\lambda_1^{-2}} & \text{if } \lambda_1 > 1.
+    \end{cases}
+\end{align}
+
+In order to study analytically this estimator, we construct an approximation of this estimator $\vect \hat x_{P_1}^{(1)}$ as 
+follow:
+\begin{equation}
+    \hat{\vect x}^{(1)}_{P_1} = m_1\vect x_1 + \sqrt{1-m_1^2}\,\vect x_3
+    \label{eq:x_hat_p1}
+\end{equation}
+where $\vect x_3$ is a spike orthogonal to the first signal $\vect x_1$.
+
+
+\section{Preparation for step 2: Study of the Hessian $\rdmmat A$}
+%\textcolor{red}{ICI METTRE L'ETUDE DE LA HESSIENNE (résumé)}
+\subsection{The matrix}
+We evaluate the Hessian at the projector estimator $\hat{\vect x}^{(1)}_{P_1}$ of Eq.~\eqref{eq:x_hat_p1}. Since $\norm{\hat{\vect x}^{(1)}_{P_1}} = 1$,
+\begin{equation}
+    \rdmmat A = \rdmmat Y_2 - \rdmmat I_n + 2\mu_R\,\rdmmat F\big(\hat{\vect x}^{(1)}_{P_1}\big)
+    = \underbrace{\Lambda\,\hat{\vect x}^{(1)}_{P_1}\hat{\vect x}^{(1)\top}_{P_1} + \lambda_2\,\vect x_2\vect x_2^\top}_{\rdmmat P}
+    + \underbrace{\rdmmat Z_2}_{\rdmmat W} + c\,\rdmmat I_n,
+    \label{eq:A_xP1}
+\end{equation}
+with
+\[
+    \Lambda = 2\mu_R(\lambda_1-1)^2 , \qquad c =  - 1 .
+\]
+This is the form $\rdmmat A = \rdmmat P + \rdmmat W + c\,\rdmmat I_n$ of Section~\ref{sec:model}. Expanding $\hat{\vect x}^{(1)}_{P_1}$ gives the signal matrix $\rdmmat P = \sum_{i,j=1}^3\beta_{ij}\,\vect e_i\vect e_j^\top = \rdmmat E \rdmmat B \rdmmat E^T$ introduced with Eq.~\eqref{eq:x_hat_p1}, i.e.\ Eq.~\eqref{eq:PinE} with $k=3$ and the coefficients of Table~\ref{tab:beta_A} in Appendix ~\ref{tab:coefficients_beta_A(xP1)}. In the large $n$ limit, $\< \vect x_2, \vect x_3\>\to0$, and the matrix $\rdmmat B$ is:
+\[
+    \rdmmat B =
+    \begin{pmatrix}
+        \Lambda m_1^2 + \lambda_2\rho^2 & \lambda_2\rho\sqrt{1-\rho^2} & \Lambda m_1\sqrt{1-m_1^2}\\
+        \lambda_2\rho\sqrt{1-\rho^2} & \lambda_2(1-\rho^2) & 0\\
+        \Lambda m_1\sqrt{1-m_1^2} & 0 & \Lambda(1-m_1^2)
+    \end{pmatrix}.
+\]
+
+\subsection{Eigenvalues}
+The eigenvalues $\theta_1\ge\theta_2\ge\theta_3$ of $\rdmmat B$ are the roots of $\theta^3 - T\theta^2 + Q\theta - D = 0$, where $T$ is the trace of $\rdmmat B$, $Q$ the sum of its principal $2\times2$ minors and $D$ its determinant. A direct computation gives
+\[
+    T = \Lambda + \lambda_2, \qquad
+    Q = \Lambda\lambda_2\,(1 - m_1^2\rho^2), \qquad
+    D = 0 .
+\]
+The determinant vanishes because $\rdmmat P$ is built from two vectors only, $\hat{\vect x}^{(1)}_{P_1}$ and $\vect x_2$, and has therefore rank $2$. The cubic factorises as $\theta\,(\theta^2 - T\theta + Q) = 0$, so that
+\begin{equation}
+    \boxed{\;
+    \theta_{1,2} = \frac{\Lambda+\lambda_2}{2} \pm \sqrt{\Big(\frac{\Lambda-\lambda_2}{2}\Big)^2 + \Lambda\lambda_2\,m_1^2\rho^2},
+    \qquad \theta_3 = 0 .\;}
+    \label{eq:theta_A}
+\end{equation}
+This is the naive-method result of Eq.~\eqref{eq:eigenvalue_naive} with $a\to\Lambda$, $b\to\lambda_2$ and $\rho\to m_1\rho = \langle\hat{\vect x}^{(1)}_{P_1},\vect x_2\rangle$, and $\theta_1$ coincides with the trigonometric expression of $\theta_1$ given at the end of the previous section.
+
+\subsection{Top three eigenvalues of $\rdmmat A$}
+By Eq.~\eqref{eq:BBP-k-spikes}, the bulk of $\rdmmat A$ is a semicircle supported on $[c-2,\,c+2]$ and its three largest eigenvalues converge to
+\begin{equation}
+    \lambda^{\mathrm{out}}_l \xrightarrow[n\to\infty]{\text{a.s.}}
+    \begin{cases}
+        \theta_l + \dfrac{1}{\theta_l} + c, & \theta_l > 1,\\[6pt]
+        2 + c, & \theta_l \le 1,
+    \end{cases}
+    \quad l = 1,2,
+    \qquad\qquad
+    \lambda^{\mathrm{out}}_3 \xrightarrow[n\to\infty]{\text{a.s.}} 2 + c .
+    \label{eq:outliers_A}
+\end{equation}
+Since $\theta_3 = 0$, the third eigenvalue always sticks to the edge of the bulk: $\rdmmat A$ has at most two outliers.
+
+\subsection{Transitions}
+\begin{equation}
+    p(\theta) = \theta^2 - (\Lambda + \lambda_2)\,\theta + \Lambda\lambda_2(1 - m_1^2\rho^2) = (\theta - \theta_1)(\theta - \theta_2),
+    \qquad
+    \Lambda = 2\mu_R\Big((\lambda_1-1)^2 + \frac1n\Big),
+    \label{eq:p_theta}
+\end{equation}
+An eigenvalue $\theta_l$ crosses $1$ when $p(1)=0$, with $p(\theta) = \theta^2 - T\theta + Q$ and
+\[
+    p(1) = (\Lambda-1)(\lambda_2-1) - \Lambda\lambda_2\,m_1^2\rho^2 .
+\]
+Solving $p(1)=0$ for $\Lambda$ defines the critical value
+\begin{equation}
+    \Lambda^* = \frac{\lambda_2 - 1}{\lambda_2\,(1-m_1^2\rho^2) - 1},
+    %\begin{comment}\qquad\text{i.e.}
+    \qquad
+    \mu_R^* = \frac{\Lambda^*}{2\big((\lambda_1-1)^2 + \frac1n\big)},
+    \label{eq:Lambda_star}
+    %\end{comment}
+\end{equation}
+and, for $m_1\rho>0$, three regimes in $\lambda_2$:
+\begin{itemize}
+    \item $p(1) < 0$: (one outlier); $1 < \lambda_2 \le \dfrac{1}{1-m_1^2\rho^2}$: $\theta_1 > 1$ and $\theta_2\le1$ for all $\Lambda$;
+    \item $p(1) > 0$: (0 or 2 outlier); Evaluating $p$ at $\theta=\lambda_2$ gives
+    \[
+        p(\lambda_2) = \lambda_2^2 - (\Lambda+\lambda_2)\lambda_2 + \Lambda\lambda_2(1-m_1^2\rho^2)
+        = -\Lambda\lambda_2\,m_1^2\rho^2 \le 0 .
+    \]
+    Since $p(\lambda_2) = (\lambda_2-\theta_1)(\lambda_2-\theta_2)$ and $\theta_1\ge\theta_2$, the two factors have opposite signs, hence
+    \begin{equation}
+        \theta_2 \le \lambda_2 \le \theta_1 .
+        \label{eq:sandwich}
+    \end{equation}
+    In particular, two outliers require $\lambda_2>1$, and $\lambda_2>1$ guarantees at least one. If $\lambda_2\le1$ then $\theta_2\le1$ and both lie below $1$ (no outlier), while if $\lambda_2>1$ then $\theta_1>1$ and both lie above $1$ (two outliers). Writing $p(1) = \Lambda\big(\lambda_2(1-m_1^2\rho^2) - 1\big) + (1-\lambda_2)$, the condition $p(1)>0$ reads
+    \[
+        \Lambda\big(\lambda_2(1-m_1^2\rho^2) - 1\big) > \lambda_2 - 1 .
+    \]
+
+    \item \textbf{No outlier} ($p(1)>0$ and $\lambda_2\le1$). Then:
+    \[
+        \Lambda < \Lambda^* .
+    \]
+    \item \textbf{Two outliers} ($p(1)>0$ and $\lambda_2>1$). Then:
+    \[
+        \Lambda > \Lambda^* .
+    \]
+
+
+\end{itemize}
+
+\subsection{Eigenvectors of the signal matrix}
+The matrix $\rdmmat P$ of Eq.~\eqref{eq:A_xP1} has the structure of the naive signal matrix of Eq.~\eqref{eq:Y-split}, with $\vect x_1$ replaced by $\hat{\vect x}^{(1)}_{P_1}$. The derivation of Appendix~\ref{sec:eigenvect_naive} then applies unchanged and Eq.~\eqref{eq:v-final} gives, for $l=1,2$ and $m_1\rho>0$,
+\begin{equation}
+    \vect v_l = c_1^l\,\hat{\vect x}^{(1)}_{P_1} + c_2^l\,\vect x_2, \qquad
+    \big(c_1^l, c_2^l\big) = \frac{(r_l,\,1)}{\sqrt{r_l^2 + 2m_1\rho\,r_l + 1}}, \qquad
+    r_l = \frac{m_1\rho\,\Lambda}{\theta_l - \Lambda} .
+    \label{eq:v_A} 
+\end{equation}
+Using $\langle\vect x_1,\vect x_2\rangle = \rho$, $\langle\vect x_1,\vect x_3\rangle = 0$ and $\langle\vect x_2,\vect x_3\rangle = \Tilde{\rho}\to0$, their overlaps $q_i^l = \langle\vect v_l,\vect x_i\rangle$ with the three spikes are
+\begin{equation}
+    q_1^l = m_1\,c_1^l + \rho\,c_2^l, \qquad
+    q_2^l = m_1\rho\,c_1^l + c_2^l = \frac{\theta_l}{\lambda_2}\,c_2^l, \qquad
+    q_3^l = \sqrt{1-m_1^2}\;c_1^l ,
+    \label{eq:q_A}
+\end{equation}
+where the second expression of $q_2^l$ comes from Eq.~\eqref{eq:overlaps-signals}.
+
+\subsection{Overlaps of the top three eigenvectors}
+Let $\vect u_1,\vect u_2,\vect u_3$ be the unit eigenvectors of $\rdmmat A$ associated with its three largest eigenvalues. By Eq.~\eqref{eq:overlap_signal_k-spikes}, for $i=1,2,3$,
+\begin{equation}
+    \boxed{\;
+    |\langle\vect u_l,\vect x_i\rangle| \xrightarrow[n\to\infty]{\text{a.s.}}
+    \begin{cases}
+        |q_i^l|\sqrt{1-\theta_l^{-2}}, & \theta_l > 1,\\
+        0, & \theta_l \le 1,
+    \end{cases}
+    \quad l=1,2,
+    \qquad
+    |\langle\vect u_3,\vect x_i\rangle| \xrightarrow[n\to\infty]{\text{a.s.}} 0 .\;}
+    \label{eq:overlaps_A}
+\end{equation}
+The third eigenvector belongs to the bulk and carries no information on the spikes. The eigenvectors and the overlaps do not depend on $c$, which only shifts the eigenvalues in Eq.~\eqref{eq:outliers_A}.
+\section{Method A}
+%\textcolor{red}{ICI METTRE LES RESULTS POUR METHOD A}
+\\
+Method A, as stated above, consists of recovering the eigenvector corresponding to the largest eigenvalue of $\rdmmat A$ as our estimator. So that:
+\begin{equation}
+\boxed{\;
+    \hat{\vect x}^{(2)}_{A} = \text{top eigenvector}(\vect A) = \vect u_1\;
+    }
+    \label{eq:x_hat_a}
+\end{equation}
+All the results below follow from the study of the Hessian, taking $l=1$ and $c = \frac{2\mu_R}{n}-1$. We write $\theta_{max} \equiv \theta_1$ for the largest eigenvalue of $\rdmmat B$, given by Eq.~\eqref{eq:theta_A}.
+
+\subsection{Top eigenvalue}
+By Eq.~\eqref{eq:outliers_A} with $l=1$, the largest eigenvalue of $\rdmmat A$, associated with $\hat{\vect x}^{(2)}_A$, converges to
+\begin{equation}
+    \lambda^{\mathrm{out}}_{max} \xrightarrow[n\to\infty]{\text{a.s.}}
+    \begin{cases}
+        \theta_{max} + \dfrac{1}{\theta_{max}} + \dfrac{2\mu_R}{n} - 1, & \theta_{max} > 1,\\[6pt]
+        1 + \dfrac{2\mu_R}{n}, & \theta_{max} \le 1 .
+    \end{cases}
+    \label{eq:top_eigenvalue_A}
+\end{equation}
+\subsection{Condition to recover the signal}
+By Eq.~\eqref{eq:overlaps_A}, $\hat{\vect x}^{(2)}_A$ carries information on the signals if and only if $\theta_{max} > 1$. From the transitions of Eq.~\eqref{eq:Lambda_star}, this condition reads
+\begin{equation}
+    \boxed{\;
+    \theta_{max} > 1
+    \quad\Longleftrightarrow\quad
+    \lambda_2 > 1
+    \quad\text{or}\quad
+    \mu_R > \mu_R^* = \frac{\Lambda^*}{2\big((\lambda_1-1)^2 + \frac1n\big)} .\;}
+    \label{eq:condition_A}
+\end{equation}
+When the second signal is detectable on its own ($\lambda_2>1$), Method A always recovers information. Otherwise, the EWC penalty has to be strong enough to push $\theta_{max}$ above $1$: the regularisation alone can make the estimator leave the bulk.
+
+\subsection{Overlaps with the signals}\label{sec:ovA}
+By Eq.~\eqref{eq:overlaps_A} with $l=1$, and using the overlaps $q_i^1$ of Eq.~\eqref{eq:q_A}, the overlaps of the estimator with the two signals are
+\begin{equation}
+\boxed{
+    m^A_1 := |\langle \hat{\vect x}^{(2)}_A, \vect{x_1}\rangle| \xrightarrow[n\to\infty]{\text{a.s.}} \big\lvert m_1 c_1^1 + \rho\, c_2^1 \big\rvert \; \sqrt{1-\theta_{max}^{-2}} }
+    \qquad
+    \boxed{
+    m^A_2 := |\langle \hat{\vect x}^{(2)}_A, \vect{x_2}\rangle| \xrightarrow[n\to\infty]{\text{a.s.}} \Bigg \lvert  \frac{\theta_{max}}{\lambda_2}c_2^1  \Bigg \rvert \; \sqrt{1-\theta_{max}^{-2}} }
+    \label{eq:overlap_A}
+\end{equation}
+for $\theta_{max} > 1$, and $m^A_1, m^A_2 \to 0$ for $\theta_{max} \le 1$, with $c_1^1, c_2^1$ given by Eq.~\eqref{eq:v_A}. These have the same form as the naive-method overlaps of Eq.~\eqref{eq:overlap_naive}. Similarly, $m^A_3 = |\langle \hat{\vect x}^{(2)}_A, \vect{x_3}\rangle| \to \sqrt{1-m_1^2}\,|c_1^1|\sqrt{1-\theta_{max}^{-2}}$ measures the part of the first-step error inherited by the second-step estimator.
+
+\subsection{Top eigenvector}\label{sec:v_max_methodeA}
+For the computations of Section~\ref{sec:optimal_param}, it is convenient to also write the top eigenvector of $\rdmmat B$ directly in the basis $\{\vect e_i\}_{i=1}^3$. Define the unnormalized components
+\[
+\begin{aligned}
+\tilde v_1&=-\beta_{13}\,(\beta_{22}-\theta_{max}),\\
+\tilde v_2&=\beta_{12}\beta_{13},\\
+\tilde v_3&=(\beta_{11}-\theta_{max})(\beta_{22}-\theta_{max})-\beta_{12}^2,
+\end{aligned}
+\]
+and the normalized ones
+\[
+v_i=\frac{\tilde v_i}{\sqrt{\tilde v_1^2+\tilde v_2^2+\tilde v_3^2}},\qquad i=1,2,3,
+\]
+so that the unit eigenvector associated with $\theta_{max}$ is
+$\vect v_{\max}=v_1\vect e_1+v_2\vect e_2+v_3\vect e_3$
+(valid for $0<m_1<1$, when $\theta_{max}$ is simple and $\tilde{\vect v}\neq\vect 0$).
+Since $\vect x_1=\vect e_1$, $\vect x_2=\rho\,\vect e_1+\sqrt{1-\rho^2}\,\vect e_2$ and $\vect x_3=\vect e_3$ in the limit $\Tilde{\rho}\to0$,
+\[
+q_1^1 = \langle\vect v_{\max},\vect x_1\rangle=v_1,\qquad
+q_2^1 = \langle\vect v_{\max},\vect x_2\rangle=\rho\, v_1+\sqrt{1-\rho^2}\,v_2 ,\qquad
+q_3^1 = \langle\vect v_{\max},\vect x_3\rangle=v_3,
+\]
+which coincide, up to a global sign, with the expressions of Eq.~\eqref{eq:q_A}.
+\section{Method B}
+\begin{comment}
+- methode B: expremier x_hat dans base de A (donc de Res_A(lam)); -> eigenvect + eigenval de section 2; treshold = au moins 1 spike hors du bulk -> same que pour méthode A\\
+\end{comment}
+\begin{comment}
+Method B, as stated above, consists of taking the estimator:
+\begin{equation}
+    \boxed{\hat{\vect x}^{(2)}_B(\lambda) = 2\mu_R\,\vect R_{\vect M}(1+\lambda)\,\vect F_1 \hat{\vect x}^{(1)}}
+    \label{eq:x_hat_b}
+\end{equation}
+with $\lambda$ fixed by $\norm{\hat{\vect x}^{(2)}(\lambda)} = 1$.
+
+\paragraph{Top eigenvector.}\label{sec:v_max_methodeA}
+Define the unnormalized components
+\[
+\begin{aligned}
+\tilde v_1&=-\beta_{13}\,(\beta_{22}-\theta_{max}),\\
+\tilde v_2&=\beta_{12}\beta_{13},\\
+\tilde v_3&=(\beta_{11}-\theta_{max})(\beta_{22}-\theta_{max})-\beta_{12}^2,
+\end{aligned}
+\]
+and the normalized ones
+\[
+v_i=\frac{\tilde v_i}{\sqrt{\tilde v_1^2+\tilde v_2^2+\tilde v_3^2}},\qquad i=1,2,3,
+\]
+so that the unit eigenvector associated with $\theta_{max}$ is
+$\vect v_{\max}=v_1\vect e_1+v_2\vect e_2+v_3\vect e_3$
+(valid when $\lambda_1$ is simple and $\tilde{\vect v}\neq\vect 0$).
+
+\paragraph{Overlaps with the signals.}
+Since $\vect x_1=\vect e_1$, $\vect x_2=\rho\,\vect e_1+\sqrt{1-\rho^2}\,\vect e_2$ and $\vect x_3=\vect e_3$ in this limit,
+\[
+\boxed{
+\begin{aligned}
+q_1 = \langle\vect v_{\max},\vect x_1\rangle&=v_1,\\[4pt]
+q_2 = \langle\vect v_{\max},\vect x_2\rangle&=\rho\, v_1+\sqrt{1-\rho^2}\,v_2 ,\\[4pt]
+q_3 = \langle\vect v_{\max},\vect x_3\rangle&=v_3.
+\end{aligned}
+}
+\]
+\end{comment}
+%\textcolor{red}{ICI METTRE LES RESULTS POUR METHOD B}
+Method B, as stated above, consists of taking the estimator:
+\begin{equation}
+        \boxed{\hat{\vect x}^{(2)}_B(\lambda) = 2\mu_R\,\vect R_{\vect A}(\lambda)\,\vect F_1 \hat{\vect x}^{(1)}}
+    \label{eq:x_hat_b}
+\end{equation}
+with $\lambda$ fixed by $\norm{\hat{\vect x}^{(2)}(\lambda)} = 1$, and $\hat{\vect x}^{(1)} = \hat{\vect x}^{(1)}_{P_1}$.
+
+\subsection{Expression in the eigenbasis of $\rdmmat A$}
+For a unit vector $\vect x$, $\rdmmat F(\vect x)\,\vect x = \big((\lambda_1-1)^2 + \frac2n\big)\vect x$, so the source term is parallel to the first-step estimator. The Lagrange multiplier only shifts the evaluation point of the resolvent of the Hessian. Writing $\rdmmat A = \sum_{j=1}^n \gamma_j\,\vect u_j\vect u_j^\top$, with $\gamma_1\ge\gamma_2\ge\dots$ and $\gamma_l = \lambda^{\mathrm{out}}_l$ for the outliers,
+\begin{equation}
+    \boxed{\;
+    \hat{\vect x}^{(2)}_B(\lambda) = \kappa\,\vect R_{\rdmmat A}(\lambda)\,\hat{\vect x}^{(1)}
+    = \kappa\sum_{j=1}^n \frac{\langle\vect u_j,\hat{\vect x}^{(1)}\rangle}{\gamma_j-\lambda}\,\vect u_j,
+    \qquad
+    \kappa = 2\mu_R\Big((\lambda_1-1)^2 + \frac2n\Big) .\;}
+    \label{eq:xB_basisA}
+\end{equation}
+The estimator is a combination of \emph{all} the eigenvectors of $\rdmmat A$, each weighted by its overlap with $\hat{\vect x}^{(1)}$ and by the distance of its eigenvalue to $\lambda$.
+
+\subsection{Norm equation}\label{sec:B_norm}
+The constraint $\norm{\hat{\vect x}^{(2)}_B}=1$ reads
+\begin{equation}
+    \kappa^2\sum_{j=1}^n \frac{\langle\vect u_j,\hat{\vect x}^{(1)}\rangle^2}{(\gamma_j-\lambda)^2} = 1 .
+    \label{eq:secular_B}
+\end{equation}
+The left-hand side has a pole at every eigenvalue of $\rdmmat A$, so Eq.~\eqref{eq:secular_B} has several roots. On $(\gamma_1,\infty)$ it decreases from $+\infty$ to $0$, so it has a unique root $\lambda>\gamma_1$, which we select. The overlaps below are defined up to a global sign.
+
+\subsection{Contribution of the outliers}\label{sec:B_outliers}
+By Eq.~\eqref{eq:BBP_overlap_k_spikes}, an outlier eigenvector decomposes as $\vect u_l = \langle\vect u_l,\vect v_l\rangle\,\vect v_l + \vect w_l$, with $\vect w_l$ asymptotically orthogonal to the signal subspace. Hence, for $\vect a,\vect b\in\mathrm{span}(\vect x_1,\vect x_2,\vect x_3)$ and $\theta_l>1$,
+$\langle\vect u_l,\vect a\rangle\langle\vect u_l,\vect b\rangle \to (1-\theta_l^{-2})\langle\vect v_l,\vect a\rangle\langle\vect v_l,\vect b\rangle$. With $q_i^l$ of Eq.~\eqref{eq:q_A} and
+\[
+    q_s^l := \langle\vect v_l,\hat{\vect x}^{(1)}\rangle = \frac{\theta_l}{\Lambda}\,c_1^l
+\]
+(Eq.~\eqref{eq:overlaps-signals} with $a\to\Lambda$ and $\vect x_1\to\hat{\vect x}^{(1)}$), the outliers contribute to the overlap $\langle\hat{\vect x}^{(2)}_B,\vect x_i\rangle$ the term
+\[
+    \kappa\sum_{l\,:\,\theta_l>1}\big(1-\theta_l^{-2}\big)\,\frac{q_s^l\,q_i^l}{\theta_l + \frac{1}{\theta_l} + c - \lambda} .
+\]
+This term is non-zero if and only if at least one spike leaves the bulk, i.e.\ $\theta_{max}>1$, the condition of Eq.~\eqref{eq:condition_A}.
+\begin{comment}
+\subsection{Large-$n$ limit}
+The bulk eigenvectors have individual overlaps of order $n^{-1/2}$ with the spikes, but there are $n$ of them: their contribution to Eq.~\eqref{eq:xB_basisA} stays of order one and must be summed. This is done with the resolvent of $\rdmmat A$ on the signal subspace (Appendix~\ref{adix:resolvent_A}): for $\vect a,\vect b\in\mathrm{span}(\vect x_1,\vect x_2,\vect x_3)$ and $z>\gamma_1$,
+\begin{equation}
+    \langle\vect a,\vect R_{\rdmmat A}(z)\,\vect b\rangle \xrightarrow[n\to\infty]{\text{a.s.}}
+    \sum_{l=1}^3 \frac{\langle\vect a,\vect v_l\rangle\langle\vect v_l,\vect b\rangle}{\theta_l - \omega(z)},
+    \qquad
+    \omega(z) = \frac{1}{S_W(z-c)},
+    \label{eq:resolvent_A}
+\end{equation}
+with $S_W$ the Stieltjes transform of the semicircle law. Since $\rdmmat P\vect v_3 = 0$ and $\hat{\vect x}^{(1)}$, $\vect x_2$ are linearly independent, $\langle\vect v_3,\hat{\vect x}^{(1)}\rangle = 0$ and only $l=1,2$ contribute when $\vect b = \hat{\vect x}^{(1)}$. Using $\norm{\vect R_{\rdmmat A}(z)\hat{\vect x}^{(1)}}^2 = \partial_z\langle\hat{\vect x}^{(1)},\vect R_{\rdmmat A}(z)\hat{\vect x}^{(1)}\rangle$ and $\omega'(z) = 1/\big(1-S_W(z-c)^2\big)$, which follows from $S_W^2 - zS_W + 1 = 0$, the norm equation~\eqref{eq:secular_B} becomes
+\begin{equation}
+    \frac{\kappa^2}{1-S_W(\lambda-c)^2}\sum_{l=1}^{2}\frac{(q_s^l)^2}{\big(\theta_l - \omega(\lambda)\big)^2} = 1,
+    \label{eq:norm_B}
+\end{equation}
+which fixes $\lambda$, and the overlaps of the estimator with the signals are
+\begin{equation}
+\boxed{
+    m^B_i := |\langle \hat{\vect x}^{(2)}_B, \vect{x_i}\rangle| \xrightarrow[n\to\infty]{\text{a.s.}}
+    \kappa\,\left|\sum_{l=1}^{2}\frac{q_i^l\,q_s^l}{\theta_l - \omega(\lambda)}\right|,
+    \qquad i = 1,2,3 .}
+    \label{eq:overlap_B}
+\end{equation}
+Explicitly, for the two signals,
+\[
+    m^B_1 \to \kappa\left|\sum_{l=1}^{2}\frac{\theta_l\,c_1^l\,\big(m_1c_1^l + \rho\,c_2^l\big)}{\Lambda\,\big(\theta_l - \omega(\lambda)\big)}\right|,
+    \qquad
+    m^B_2 \to \kappa\left|\sum_{l=1}^{2}\frac{\theta_l^2\,c_1^l\,c_2^l}{\Lambda\lambda_2\,\big(\theta_l - \omega(\lambda)\big)}\right| .
+\]
+The poles $\omega(\lambda) = \theta_l$ correspond to $\lambda = \theta_l + 1/\theta_l + c$, i.e.\ to the outliers of Eq.~\eqref{eq:outliers_A}.
+\end{comment}
+\subsection{Asymptotic overlaps}
+\label{subsec:B_overlaps}
+
+We write $z := \lambda - c$ for the multiplier measured from the centre of the bulk, and use the Stieltjes transform of Appendix~\ref{proof:BBP1},
+\begin{equation}
+    S_W(z) = \frac{z - \sqrt{z^2-4}}{2} \in (0,1), \qquad
+    -S_W'(z) = \frac{S_W(z)^2}{1-S_W(z)^2} > 0, \qquad z > 2 .
+\end{equation}
+Recall from Eq.~\eqref{eq:xB_basisA} that $\hat x^{(2)}_B = \kappa\, R_A(\lambda)\, \hat x^{(1)}$ with $\kappa = 2\mu_R\big((\lambda_1-1)^2 + \tfrac{2}{n}\big)$,
+and from Eqs.~\eqref{eq:v_A}--\eqref{eq:q_A} and Section~\ref{sec:B_outliers} the (signed) overlaps
+\begin{equation}
+    q_{il} = \langle v_l, x_i\rangle, \qquad
+    q_{sl} := \langle v_l, \hat x^{(1)}\rangle = c^l_1\,\frac{\theta_l}{\Lambda}, \qquad l = 1,2 .
+\end{equation}
+Since $\theta_3 = 0$ and $\hat x^{(1)} \in \mathrm{span}(v_1,v_2)$, we have $q_{s3} = 0$: only $l = 1,2$ enter below.
+
+\begin{proposition}[Overlaps of Method B]
+\label{prop:B_overlaps}
+Assume $m_1\rho > 0$ and let
+$z_* := \max\!\big(2,\ \max_{l:\,\theta_l > 1}(\theta_l + \theta_l^{-1})\big)$, the right edge of the spectrum of $A - cI_n$.
+Then, almost surely as $n\to\infty$, the multiplier selected in Section~\ref{sec:B_norm} converges, $\lambda \to c + z^\star$,
+where $z^\star$ is the unique solution on $(z_*,\infty)$ of
+\begin{equation}
+    \kappa^2 \sum_{l=1}^{2} q_{sl}^2\,
+    \frac{-S_W'(z)}{\big(1-\theta_l S_W(z)\big)^2} = 1 ,
+    \label{eq:B_norm}
+\end{equation}
+and the overlaps of the estimator with the signals converge to
+\begin{equation}
+    m^B_i := \big|\langle \hat x^{(2)}_B, x_i\rangle\big|
+    \xrightarrow[n\to\infty]{a.s.}
+    \kappa\, \left| \sum_{l=1}^{2} q_{il}\, q_{sl}\,
+    \frac{S_W(z^\star)}{1-\theta_l S_W(z^\star)} \right| ,
+    \qquad i = 1,2,3 .
+    \label{eq:B_overlap}
+\end{equation}
+\end{proposition}
+
+The proof is given in Appendix~\ref{app:B_resolvent}. The $n$ terms of Eq.~\eqref{eq:xB_basisA} collapse into a $2\times 2$ problem:
+the bulk eigenvectors are individually random, but their total contribution is captured exactly by $S_W$.
+
+\begin{remark}[Structure of the poles]
+Near an outlier, $z \to z_l = \theta_l + \theta_l^{-1}$, one has $S_W(z_l) = 1/\theta_l$ and $S_W'(z_l) = 1/(1-\theta_l^2)$
+(Appendix~\ref{proof:BBP_k_overlaps}), so that
+\begin{equation}
+    \frac{S_W(z)}{1-\theta_l S_W(z)} \simeq \frac{1-\theta_l^{-2}}{\theta_l + \theta_l^{-1} + c - \lambda} .
+\end{equation}
+The pole part of Eq.~\eqref{eq:B_overlap} is therefore exactly the contribution of the outlier eigenvector $u_l$,
+$\kappa\,(1-\theta_l^{-2})\, q_{sl} q_{il} / (\theta_l + \theta_l^{-1} + c - \lambda)$, obtained directly from Eq.~\eqref{eq:BBP_overlap_k_spikes}.
+The regular remainder is the contribution of the bulk.
+\end{remark}
+
+\subsection{Condition to recover the signal}
+As for Method A, $\theta_{\max} > 1$ is the condition for an outlier to exist. Unlike Method A, Method B has no sharp
+recovery transition. The left-hand side of Eq.~\eqref{eq:B_norm} diverges as $z \to z_*^+$
+(through the pole $1-\theta_{\max}S_W = 0$ if $\theta_{\max} > 1$, through $-S_W' \to \infty$ as $z\to 2^+$ otherwise),
+and vanishes as $z\to\infty$, so a root always exists. Even for $\theta_{\max} \le 1$, Eq.~\eqref{eq:B_overlap}
+is non-zero as soon as $q_{il} q_{sl} \neq 0$. The estimator is then built from the bulk eigenvectors only,
+weighted by their overlap with $\hat x^{(1)}$, and it keeps information on $x_1$, and on $x_2$ through the correlation $\rho$.
+
+\begin{remark}[The case $m_1\rho = 0$]
+If $m_1 \rho = 0$ (e.g. $\lambda_1 \le 1$, or $\rho = 0$), Eq.~\eqref{eq:v_A} no longer holds: $v_1, v_2$ are $\hat x^{(1)}$ and $x_2$,
+and $\hat x^{(1)}$ may have no component on the top outlier ($q_{s1} = 0$ when $\lambda_2 > \Lambda$).
+The left-hand side of Eq.~\eqref{eq:B_norm} then stays bounded at $z_*$. If it is $\ge 1$ there, the proposition holds unchanged.
+Otherwise $\lambda$ sticks to the top outlier, $z^\star = z_*$, and the missing norm
+$\tau^2 = 1 - \kappa^2 \sum_l q_{sl}^2 (-S_W')/(1-\theta_l S_W)^2$ goes on $u_1$, adding $\tau\, |q_{i1}| \sqrt{1-\theta_1^{-2}}$ to $m^B_i$.
+\end{remark}
+
+
+
+
+
+\newpage
+

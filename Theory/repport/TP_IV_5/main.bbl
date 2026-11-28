@@ -1,0 +1,63 @@
+\begin{thebibliography}{10}
+
+\bibitem{baik2005phase}
+Jinho Baik, G{\'e}rard Ben~Arous, and Sandrine P{\'e}ch{\'e}.
+\newblock Phase transition of the largest eigenvalue for nonnull complex sample
+  covariance matrices.
+\newblock {\em The Annals of Probability}, 33(5):1643--1697, 2005.
+
+\bibitem{benaych2011eigenvalues}
+Florent Benaych-Georges and Raj~Rao Nadakuditi.
+\newblock The eigenvalues and eigenvectors of finite, low rank perturbations of
+  large random matrices.
+\newblock {\em Advances in Mathematics}, 227(1):494--521, 2011.
+
+\bibitem{feral2007largest}
+Delphine F{\'e}ral and Sandrine P{\'e}ch{\'e}.
+\newblock The largest eigenvalue of rank one deformation of large {W}igner
+  matrices.
+\newblock {\em Communications in Mathematical Physics}, 272:185--228, 2007.
+
+\bibitem{bbp_paper}
+Niklas Forner, Alexander Maloney, and Bernd Rosenow.
+\newblock {BBP} phase transition for an extensive number of outliers, 2025.
+
+\bibitem{Keup_2025}
+Christian Keup and Lenka Zdeborová.
+\newblock Optimal thresholds and algorithms for a model of multi-modal learning
+  in high dimensions.
+\newblock {\em Journal of Statistical Mechanics: Theory and Experiment},
+  2025(9):093302, 2025.
+
+\bibitem{Kirkpatrick_2017}
+James Kirkpatrick, Razvan Pascanu, Neil Rabinowitz, Joel Veness, Guillaume
+  Desjardins, Andrei~A. Rusu, Kieran Milan, John Quan, Tiago Ramalho, Agnieszka
+  Grabska-Barwinska, Demis Hassabis, Claudia Clopath, Dharshan Kumaran, and
+  Raia Hadsell.
+\newblock Overcoming catastrophic forgetting in neural networks.
+\newblock {\em Proceedings of the National Academy of Sciences},
+  114(13):3521--3526, 2017.
+
+\bibitem{mergny2025spectralthresholdscorrelatedspiked}
+Pierre Mergny and Lenka Zdeborová.
+\newblock Spectral thresholds in correlated spiked models and fundamental
+  limits of partial least squares, 2025.
+
+\bibitem{peche2006largest}
+Sandrine P{\'e}ch{\'e}.
+\newblock The largest eigenvalue of small rank perturbations of {H}ermitian
+  random matrices.
+\newblock {\em Probability Theory and Related Fields}, 134(1):127--173, 2006.
+
+\bibitem{tabanelli2025computationalthresholdsmultimodallearning}
+Hugo Tabanelli, Pierre Mergny, Lenka Zdeborová, and Florent Krzakala.
+\newblock Computational thresholds in multi-modal learning via the spiked
+  matrix-tensor model.
+\newblock {\em arXiv preprint arXiv:2506.02664}, 2025.
+
+\bibitem{wigner1958distribution}
+Eugene~P. Wigner.
+\newblock On the distribution of the roots of certain symmetric matrices.
+\newblock {\em Annals of Mathematics}, 67(2):325--327, 1958.
+
+\end{thebibliography}

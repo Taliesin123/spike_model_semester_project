@@ -1,0 +1,44 @@
+\subsection{BBP transition for $k$ spikes} \label{sec:general_results}
+We generalise Theorem~\ref{thm:bbp} to the observation $\rdmmat Y = \rdmmat P + \rdmmat W + c\,\rdmmat I_n$ of Eq.~\eqref{eq:observation}. Since $\rdmmat P$ has rank at most $k$, it creates at most $k$ outliers. The following result is a special case of~\cite{benaych2011eigenvalues}; see also~\cite{bbp_paper} for a number of spikes growing with $n$.
+
+\begin{theo}[BBP transition for $k$ spikes]\label{thm:bbp_k}
+Let $\rdmmat Y = \rdmmat P + \rdmmat W + c\,\rdmmat I_n$, with $c \in \R$ and $\rdmmat W$ a Wigner matrix independent of the signals. Let $\theta_1 > \dots > \theta_k > 0$ be the non-zero eigenvalues of $\rdmmat P$, assumed distinct, with unit eigenvectors $\vect v_1, \dots, \vect v_k$. For $l = 1,\dots,k$, let $\lambda_l^{\mathrm{out}}$ be the $l$-th largest eigenvalue of $\rdmmat Y$ and $\vect u_l$ an associated unit eigenvector. Then, almost surely as $n\to\infty$,
+\begin{equation}
+    \lambda_l^{\mathrm{out}} \longrightarrow
+    \begin{cases}
+        \theta_l + \dfrac{1}{\theta_l} + c, & \theta_l > 1 ,\\[6pt]
+        2 + c, & \theta_l \le 1 ,
+    \end{cases}
+    \label{eq:BBP-k-spikes}
+\end{equation}
+and, for $l, l' = 1,\dots,k$,
+\begin{equation}
+    |\langle \vect u_l, \vect v_{l'} \rangle|^2 \longrightarrow
+    \begin{cases}
+        \delta_{ll'} \Big(1 - \dfrac{1}{\theta_l^{2}} \Big), & \theta_l > 1, \\[6pt]
+        0, & \theta_l \le 1 .
+    \end{cases}
+    \label{eq:BBP_overlap_k_spikes}
+\end{equation}
+\end{theo}
+\noindent
+The proofs of Eqs.~\eqref{eq:BBP-k-spikes} and~\eqref{eq:BBP_overlap_k_spikes} are given, in our notation, in Appendices~\ref{proof:BBP_k_spikes} and~\ref{proof:BBP_k_overlaps}. The $k$ correlated spikes behave as $k$ \emph{independent} rank-one spiked models of strengths $\theta_l$: the correlations between the tasks only enter through the spectrum of $\rdmmat P$.
+
+\noindent
+Since the $\{\vect v_l\}_{l=1}^k$ form an orthonormal basis of $\mathrm{span}(\vect x_1, \dots, \vect x_k)$, each signal decomposes as $\vect x_i = \sum_{l=1}^k q_i^l\,\vect v_l$, with $q_i^l = \langle \vect v_l, \vect x_i \rangle$.
+
+\begin{cor}[Overlaps with the signals]\label{cor:overlap_signals}
+Under the assumptions of Theorem~\ref{thm:bbp_k}, the overlaps $m_i^l = |\langle \vect u_l, \vect x_i \rangle|$ of the eigenvectors of $\rdmmat Y$ with the signals satisfy, almost surely as $n\to\infty$,
+\begin{equation}
+    m_i^{l} \longrightarrow
+    \begin{cases}
+        \big |q_{i}^{l} \big | \sqrt{1 - \dfrac{1}{\theta_l^{2}}}, & \theta_l > 1, \\[6pt]
+        0, & \theta_l \le 1,
+    \end{cases}
+    \qquad i, l = 1,\dots,k .
+    \label{eq:overlap_signal_k-spikes}
+\end{equation}
+\end{cor}
+\begin{proof}
+$\langle \vect u_l, \vect x_i \rangle = \sum_{l'=1}^k q_i^{l'} \langle \vect u_l, \vect v_{l'} \rangle$, and by Eq.~\eqref{eq:BBP_overlap_k_spikes} only the term $l' = l$ survives.
+\end{proof}

@@ -1,0 +1,11 @@
+\subsection{Notation}
+Throughout, $\lambda_l$ denotes the signal-to-noise ratio of task $l$. The symbols reserved for each matrix are summarised below.
+\begin{center}
+\begin{tabular}{l|l|l|l}
+ & \textbf{noisy} $\rdmmat Y $ & \textbf{noiseless} $\rdmmat P \in \R^{n\times n}$ & $\rdmmat B \in \R^{k\times k}$\\
+\hline
+eigenvalues     & $\lambda^{\mathrm{out}}_l$, \eqref{eq:BBP-k-spikes} & $\theta_l$, \eqref{eq:theta-pm} &  $\theta_l$\\
+eigenvectors    & $\vect u_l$, \eqref{eq:BBP_overlap_k_spikes} & $\vect v_l = (\Tilde{v}_{1l},\Tilde{v}_{2l},\ldots,\Tilde{v}_{kl},0,\ldots,0)^T$, \eqref{eq:v-final} & $\vect{\Tilde{v}_{l}} = (\Tilde{v}_{1l},\Tilde{v}_{2l},\ldots,\Tilde{v}_{kl})^T$\\
+overlaps        & $m_i^l = |\langle \hat{\vect x}_l, \vect{x_i}\rangle|$, \eqref{eq:overlap_naive}, \eqref{eq:overlap_A}, \eqref{eq:B_overlap} & $q_i^l = |\langle \vect v_l, \vect{x_i}\rangle|$, \eqref{eq:overlaps-signals} & \\
+\end{tabular}
+\end{center}

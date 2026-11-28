@@ -1,0 +1,93 @@
+\section{Setting, Main Results, and Related Work}\label{sec:model}
+
+%\subsection{Definition of the model}\label{sec:model}
+
+\begin{defn}[Multi-Task Spiked Wigner Model]\leavevmode\\
+    Let $k\ge1$ be the number of tasks. For $l = 1,\dots,k$, let $\lambda_l \in \R$ be the signal-to-noise ratio of task $l$ and $\vect x_l \in \R^n$, with $\norm{\vect x_l} = 1$, its signal. The signals are correlated:
+    \[
+    \langle \vect{x_i},\vect{x_j}\rangle \xrightarrow[n\to\infty]{\text{a.s.}} \rho_{ij}, \qquad \text{with} \quad 0 \leq \rho_{ij} \leq 1, \quad \rho_{ii} = 1, \qquad i,j = 1,\dots,k.
+    \]
+    We define independent Gaussian noises $\rdmmat Z_1,\dots,\rdmmat Z_k$:
+    \begin{align}
+        \forall (l,i,j) \in [k]\times[n]^2 \,, \; Z_{l,ij} = Z_{l,ji} \overset{\mathrm{i.i.d.}}{\sim} \mathcal{N}\bigg(0,\frac{1}{n}\bigg) ,
+    \end{align}
+    and write the multi-spiked model as
+    \begin{align}
+        \rdmmat Y_l \, = \, \lambda_l \vect x_l \vect x_l^T + \rdmmat Z_l \, , \qquad l = 1,\dots,k.
+    \end{align}
+    \noindent
+    The methods studied in this report all reduce to the spectrum of an observation of the form
+    \begin{equation}
+    \rdmmat Y := \rdmmat P + \rdmmat W + c \rdmmat I_n,
+    \qquad
+    \rdmmat P = \sum_{i,j = 1}^k \alpha_{ij} \vect x_i \vect x_j^\top, \quad \alpha_{ij} \geq 0,
+    \label{eq:observation}
+    \end{equation}
+    where $\rdmmat W$ is a Wigner matrix (the noise), $c \in \R$ is a shift, and $\rdmmat P$ is the signal matrix.
+\end{defn}
+\noindent
+We call $\rdmmat P$ the \emph{noiseless} (or signal) matrix and $\rdmmat Y$ the \emph{noisy} matrix. $\rdmmat P$ is not observed, but it contains no randomness beyond the signals and can be diagonalised exactly; the spectrum of $\rdmmat Y$ is then obtained asymptotically from random matrix theory. For $k = 2$, we write $\rho := \rho_{12}$. The single-spike model is the case $k=1$, $\rdmmat Y = \lambda\,\vect x\vect x^T + \rdmmat Z$.
+
+\noindent
+The signals span a space of dimension $k$, in which $\rdmmat P$ can be expressed with an orthonormal basis $\{\vect e_i\}_{i=1}^k$ of span$(\vect x_1, \dots, \vect x_k)$:
+\begin{equation}
+    \rdmmat P = \sum_{i,j = 1}^k \beta_{ij} \vect e_i \vect e_j^\top = \rdmmat E \rdmmat B \rdmmat E^T
+    \label{eq:PinE}
+\end{equation}
+where $\rdmmat B \in \R^{k\times k}$ with $(\rdmmat B)_{ij} = \beta_{ij} \geq 0 $ and $\rdmmat E = (\vect e_1 \;\; \dots \;\; \vect e_k) \in \R^{n \times k}$. Since $\rdmmat P$ is built from $k$ rank-one signals, it has rank at most $k$ and $n-k$ zero eigenvalues. Its non-zero eigenvalues $\theta_l$ are the eigenvalues of $\rdmmat B$, and its eigenvectors are given by those of $\rdmmat B$:
+\[
+\rdmmat B \vect{\Tilde{v}}_l = \theta_l \vect{\Tilde{v}}_l \in \mathbb R^k,
+\qquad
+\rdmmat P \vect{v}_l = \theta_l \vect{v}_l \in \mathbb R^n,
+\qquad
+\vect v_l = (\Tilde{v}_{1l},\Tilde{v}_{2l},\ldots,\Tilde{v}_{kl},0,\ldots,0)^T
+\]
+in the basis $\{\vect e_i\}$. The non-zero eigenvectors of $\rdmmat P$ lie entirely in the signal subspace.
+
+\subsection{BBP transition for a single spike}
+We first recall the single-spike case $k=1$. Above a critical signal-to-noise ratio $\lambda$, an eigenvalue of $\rdmmat Y$ detaches from the bulk of the spectrum: this is the \emph{BBP transition}, and the signal becomes detectable by spectral methods. The bulk itself has a deterministic limit.
+
+\begin{theo}[Semicircle Law~\cite{wigner1958distribution}]\label{thm:semi-circle}
+Let $\lambda_1(Y),\dots,\lambda_n(Y)$ denote the eigenvalues of $\rdmmat Y$. The empirical spectral distribution
+\begin{align}
+\hat{\mu}_Y := \frac{1}{n}\sum_{i=1}^n \delta_{\lambda_i(Y)}
+\end{align}
+converges weakly almost surely as $n \to \infty$ to the semi-circle distribution with density
+\begin{align}
+    \rho_{sc}(x) := \frac{1}{2\pi}\sqrt{4-x^2}\,\mathbf{1}_{|x|\le 2}.
+\end{align}
+\end{theo}
+
+
+\noindent
+The top eigenvector $\hat{\vect x}$ of $\rdmmat Y$ is the natural estimator of $\vect x$. Its quality is measured by the overlap
+\begin{equation}
+    m_n = \lvert \langle \hat{\vect x} 
+     , \vect x\rangle \rvert = \rvert\sum_{i=1}^n \hat{x}_i x_i \rvert \, ,
+    \label{eq:overlap_u}
+\end{equation}
+which tends to $1$ for perfect recovery and to $0$ for an estimator uncorrelated with the signal.
+
+\begin{theo}[BBP transition~\cite{baik2005phase, peche2006largest, feral2007largest, benaych2011eigenvalues}]\label{thm:bbp}
+Let $\hat{\vect x}$ be the top eigenvector of $\rdmmat Y$ associated to the eigenvalue $\lambda_{\max}$. Additionally, $\hat{\vect x}$ is normalised so that $\|\hat{\vect x}\| = 1$, consistently with $\|\vect x\| = 1$. Then, as $n\to\infty$, the largest eigenvalue satisfies
+\begin{align}
+\lambda_{\max}(Y)\xrightarrow{\mathrm{a.s.}}
+\begin{cases}
+2 & \text{if } \lambda \le 1,\\[0.3em]
+\lambda+\lambda^{-1} & \text{if } \lambda > 1,
+\end{cases}
+\end{align}
+and the overlap \eqref{eq:overlap_u} between $\hat{\vect x}$ and the spike direction $\vect x$ satisfies
+\begin{align}
+    m_n
+    %
+    \xrightarrow{\mathrm{a.s.}}
+    %
+    m := \begin{cases}
+        0 & \text{if } \lambda \le 1,\\[0.3em]
+        \sqrt{1-\lambda^{-2}} & \text{if } \lambda > 1.
+    \end{cases}
+\end{align}
+In particular, weak recovery by PCA is possible if and only if \(\lambda>1\).
+\end{theo}
+The proof is given in Appendix~\ref{proof:BBP1}.
