@@ -237,8 +237,75 @@ Since $\vect x_i=\sum_{l}q_i^l\vect v_l$, we have $\langle\vect u_l,\vect x_i\ra
 which is eq.~\eqref{eq:overlap_signal_k-spikes}. (In your notes the sum should read $\langle\vect u_l,\vect v_{l'}\rangle$, not $\langle\vect u_{l'},\vect v_{l'}\rangle$.)
 
 %\paragraph{Factorised form:}
-\section{Application of BBP}
-\subsection{Naive Method}\label{proof:naive}
+
+\section{EWC: Fisher matrix and stationarity condition}
+
+\subsection{Derivation of the Fisher matrix}\label{adix:fisher}
+
+We consider a single task, $\vect Y = \lambda\,\vect x\vect x^\top + \vect W$ (for the first task of Section~\ref{sec:ewc}, $\lambda = \lambda_1$), with the misspecified loss
+\[
+    \mathcal{L}(\vect{x}) = -\tfrac{1}{4} \|\vect Y - \vect{x}\vect{x}^\top\|_F^2 .
+\]
+Its gradient is
+\[
+    \vect \nabla_x \mathcal{L}(\vect{x}) = (\vect Y - \vect{x} \vect{x}^\top) \vect{x} = \vect Z\vect{x},
+    \qquad \vect Z := \vect Y - \vect{x} \vect{x}^\top ,
+\]
+so that, since $\vect Z^\top = \vect Z$,
+\[
+    \vect \nabla_x \mathcal{L}(\vect{x}) \vect \nabla_x \mathcal{L}(\vect{x})^\top = \vect Z \vect{x}\vect{x}^\top \vect Z ,
+    \qquad
+    \mathcal{F}_{\mathrm{MS}}(\vect{x}) = \mathbb{E}[\vect Z \vect{x}\vect{x}^\top \vect Z] .
+\]
+With $\vect Z = (\lambda - 1) \vect{x} \vect{x}^\top + \vect W$, where $\vect W$ is the bulk of the noise, a symmetric Gaussian Wigner matrix with $\mathbb{E}[W_{ij}]=0$ and $\mathbb{E}[W_{ij}^2]=\sigma^2=\frac{1}{n}$, the cross terms vanish and
+\[
+\mathbb{E} [\vect Z \vect{x} \vect{x}^\top \vect Z] = (\lambda - 1)^2 \vect{x} \vect{x}^\top + \mathbb{E}[\vect W \vect{x} \vect{x}^\top \vect W] .
+\]
+\begin{property} \label{prop:wigner_expectation}
+\[
+    \mathbb{E}[\vect W \vect A \vect W] = \sigma^2(\mathrm{Tr}(\vect A) \vect I + \vect A^\top).
+\]
+\end{property}
+\noindent
+Applying Prop.~\ref{prop:wigner_expectation} to $\vect A = \vect{x} \vect{x}^\top$ with $\|\vect{x}\| = 1$, i.e.\ $\mathrm{Tr}(\vect A) = 1$ and $\vect A^\top = \vect A$,
+\[
+\mathbb{E}[\vect W \vect{x} \vect{x}^\top \vect W] = \frac{1}{n}(\vect I + \vect{x} \vect{x}^\top),
+\]
+which gives the Fisher matrix used in Section~\ref{sec:ewc}:
+\begin{equation}
+    \mathcal{F}_{\mathrm{MS}}(\vect{x}) = (\lambda-1)^2\vect{x}\vect{x}^\top + \frac{1}{n}(\vect I + \vect{x} \vect{x}^\top) .
+    \label{eq:fisher_ms}
+\end{equation}
+
+\subsection{Derivation of the EWC stationarity condition}\label{adix:ewc}
+With the misspecified losses $\mathcal{L}_{i,\mathrm{MS}}(\vect{x}) = -\tfrac{1}{4} \|\vect Y_i - \vect{x}\vect{x}^\top\|_F^2$, of gradient $\vect \nabla \mathcal{L}_{i,\mathrm{MS}}(\vect{x}) = (\vect Y_i - \vect{x}\vect{x}^\top) \vect{x}$, the EWC loss is
+\[
+    \mathcal L_{\mathrm{EWC}}(\vect{x}) = \mathcal{L}_{2,\mathrm{MS}}(\vect{x}) +
+    \mu_R (\vect{x} - \hat{\vect{x}}^{(1)})^\top \vect F_1(\vect{x} - \hat{\vect{x}}^{(1)}),
+\]
+with $\hat{\vect{x}}^{(1)}$ the optimizer of $\mathcal{L}_{1,\mathrm{MS}}$ on the first task only. Using $\vect F_1^\top=\vect F_1$,
+\[
+    \vect \nabla \mathcal L_{\mathrm{EWC}}(\vect{x})= (\vect Y_2 - \vect{x} \vect{x}^\top) \vect{x}+2\mu_R \vect F_1(\vect{x} - \hat{\vect x}^{(1)}) .
+\]
+We substitute $\|\vect{x}\|^2 = 1$ directly into the gradient (rather than enforcing it through a Lagrange multiplier at this stage), which linearises the stationarity condition in $\vect{x}$. The constraint is re-imposed afterwards through the Lagrange multiplier of Eq.~\eqref{eq:final_estimator_lagrange}. The gradient becomes
+\[
+ \vect \nabla \mathcal L_{\mathrm{EWC}}(\vect{x})= (\vect Y_2 - \vect I) \vect{x}+2\mu_R \vect F_1(\vect{x} - \hat{\vect x}^{(1)}),
+\]
+and the Hessian is
+\[
+    \mathcal{H}_{\mathrm{EWC}} = \vect \nabla \vect \nabla ^\top \mathcal{L}_{\mathrm{EWC}} = \vect Y_2 - \vect I  + 2 \mu_R \vect F_1 .
+\]
+The stationarity condition $\vect \nabla \mathcal L_{\mathrm{EWC}}(\vect{x})= 0$ then reads
+\[
+(\vect Y_2 - \vect I + 2 \mu_R \vect F_1) \vect{x}=2 \mu_R\vect F_1\hat{\vect x}^{(1)},
+\]
+which is the affine system $\vect A \vect{x} = \vect b$ of Eq.~\eqref{eq:stationary_condition}, with $\vect A = \mathcal{H}_{\mathrm{EWC}}$. Whenever $\vect A$ is invertible, it is solved by
+\[
+    \hat{\vect{x}}^{(2)} = \vect A^{-1}\vect b = 2\mu_R\,\vect R_{\vect A}(0)\,\vect F_1 \hat{\vect x}^{(1)},
+\]
+with $\vect R_{\vect A}(z) = (\vect A - z\vect I)^{-1}$ the resolvent of $\vect A$, as in Section~\ref{sec:ewc}.
+
+\section{Naive method}\label{proof:naive}
 The observable splits into a noise part and a low rank signal part:
 \begin{equation}
     \rdmmat Y = \underbrace{a\,\vect{x_1}\vect{x_1}^T + b\,\vect{x_2}\vect{x_2}^T}_{=:\ \rdmmat P}
@@ -398,7 +465,7 @@ Multiplying the first relation in Eq. \eqref{eq:overlaps-signals} by $a\,\langle
     \label{eq:theta-pm-relation}
 \end{equation}
 
-
+\section{Hessian of the EWC loss and Methods A and B}\label{adix:hessian}
 \subsection{Method A and B: Matrix $\rdmmat A$}\label{tab:coefficients_beta_A(xP1)}
 
 \begin{table}[htbp]
@@ -868,71 +935,3 @@ Assembling both noise terms with the Loss expression, the total Evaluation Loss 
   \mathcal{L}_{\mathrm{eval}}(\mu_R) = 
   - 2\Big[\lambda_1 \big(m_1^A\big)^2 + \lambda_2 \big(m_2^A\big)^2  \Big] + 2\, q_s\, m_3^A + \frac{2}{\theta_{max}}+ \mathrm{cst}.
 \end{equation}
-
-
-\section{EWC: Fisher matrix and stationarity condition}
-
-\subsection{Derivation of the Fisher matrix}\label{adix:fisher}
-
-We consider a single task, $\vect Y = \lambda\,\vect x\vect x^\top + \vect W$ (for the first task of Section~\ref{sec:ewc}, $\lambda = \lambda_1$), with the misspecified loss
-\[
-    \mathcal{L}(\vect{x}) = -\tfrac{1}{4} \|\vect Y - \vect{x}\vect{x}^\top\|_F^2 .
-\]
-Its gradient is
-\[
-    \vect \nabla_x \mathcal{L}(\vect{x}) = (\vect Y - \vect{x} \vect{x}^\top) \vect{x} = \vect Z\vect{x},
-    \qquad \vect Z := \vect Y - \vect{x} \vect{x}^\top ,
-\]
-so that, since $\vect Z^\top = \vect Z$,
-\[
-    \vect \nabla_x \mathcal{L}(\vect{x}) \vect \nabla_x \mathcal{L}(\vect{x})^\top = \vect Z \vect{x}\vect{x}^\top \vect Z ,
-    \qquad
-    \mathcal{F}_{\mathrm{MS}}(\vect{x}) = \mathbb{E}[\vect Z \vect{x}\vect{x}^\top \vect Z] .
-\]
-With $\vect Z = (\lambda - 1) \vect{x} \vect{x}^\top + \vect W$, where $\vect W$ is the bulk of the noise, a symmetric Gaussian Wigner matrix with $\mathbb{E}[W_{ij}]=0$ and $\mathbb{E}[W_{ij}^2]=\sigma^2=\frac{1}{n}$, the cross terms vanish and
-\[
-\mathbb{E} [\vect Z \vect{x} \vect{x}^\top \vect Z] = (\lambda - 1)^2 \vect{x} \vect{x}^\top + \mathbb{E}[\vect W \vect{x} \vect{x}^\top \vect W] .
-\]
-\begin{property} \label{prop:wigner_expectation}
-\[
-    \mathbb{E}[\vect W \vect A \vect W] = \sigma^2(\mathrm{Tr}(\vect A) \vect I + \vect A^\top).
-\]
-\end{property}
-\noindent
-Applying Prop.~\ref{prop:wigner_expectation} to $\vect A = \vect{x} \vect{x}^\top$ with $\|\vect{x}\| = 1$, i.e.\ $\mathrm{Tr}(\vect A) = 1$ and $\vect A^\top = \vect A$,
-\[
-\mathbb{E}[\vect W \vect{x} \vect{x}^\top \vect W] = \frac{1}{n}(\vect I + \vect{x} \vect{x}^\top),
-\]
-which gives the Fisher matrix used in Section~\ref{sec:ewc}:
-\begin{equation}
-    \mathcal{F}_{\mathrm{MS}}(\vect{x}) = (\lambda-1)^2\vect{x}\vect{x}^\top + \frac{1}{n}(\vect I + \vect{x} \vect{x}^\top) .
-    \label{eq:fisher_ms}
-\end{equation}
-
-\subsection{Derivation of the EWC stationarity condition}\label{adix:ewc}
-With the misspecified losses $\mathcal{L}_{i,\mathrm{MS}}(\vect{x}) = -\tfrac{1}{4} \|\vect Y_i - \vect{x}\vect{x}^\top\|_F^2$, of gradient $\vect \nabla \mathcal{L}_{i,\mathrm{MS}}(\vect{x}) = (\vect Y_i - \vect{x}\vect{x}^\top) \vect{x}$, the EWC loss is
-\[
-    \mathcal L_{\mathrm{EWC}}(\vect{x}) = \mathcal{L}_{2,\mathrm{MS}}(\vect{x}) +
-    \mu_R (\vect{x} - \hat{\vect{x}}^{(1)})^\top \vect F_1(\vect{x} - \hat{\vect{x}}^{(1)}),
-\]
-with $\hat{\vect{x}}^{(1)}$ the optimizer of $\mathcal{L}_{1,\mathrm{MS}}$ on the first task only. Using $\vect F_1^\top=\vect F_1$,
-\[
-    \vect \nabla \mathcal L_{\mathrm{EWC}}(\vect{x})= (\vect Y_2 - \vect{x} \vect{x}^\top) \vect{x}+2\mu_R \vect F_1(\vect{x} - \hat{\vect x}^{(1)}) .
-\]
-We substitute $\|\vect{x}\|^2 = 1$ directly into the gradient (rather than enforcing it through a Lagrange multiplier at this stage), which linearises the stationarity condition in $\vect{x}$. The constraint is re-imposed afterwards through the Lagrange multiplier of Eq.~\eqref{eq:final_estimator_lagrange}. The gradient becomes
-\[
- \vect \nabla \mathcal L_{\mathrm{EWC}}(\vect{x})= (\vect Y_2 - \vect I) \vect{x}+2\mu_R \vect F_1(\vect{x} - \hat{\vect x}^{(1)}),
-\]
-and the Hessian is
-\[
-    \mathcal{H}_{\mathrm{EWC}} = \vect \nabla \vect \nabla ^\top \mathcal{L}_{\mathrm{EWC}} = \vect Y_2 - \vect I  + 2 \mu_R \vect F_1 .
-\]
-The stationarity condition $\vect \nabla \mathcal L_{\mathrm{EWC}}(\vect{x})= 0$ then reads
-\[
-(\vect Y_2 - \vect I + 2 \mu_R \vect F_1) \vect{x}=2 \mu_R\vect F_1\hat{\vect x}^{(1)},
-\]
-which is the affine system $\vect A \vect{x} = \vect b$ of Eq.~\eqref{eq:stationary_condition}, with $\vect A = \mathcal{H}_{\mathrm{EWC}}$. Whenever $\vect A$ is invertible, it is solved by
-\[
-    \hat{\vect{x}}^{(2)} = \vect A^{-1}\vect b = 2\mu_R\,\vect R_{\vect A}(0)\,\vect F_1 \hat{\vect x}^{(1)},
-\]
-with $\vect R_{\vect A}(z) = (\vect A - z\vect I)^{-1}$ the resolvent of $\vect A$, as in Section~\ref{sec:ewc}.

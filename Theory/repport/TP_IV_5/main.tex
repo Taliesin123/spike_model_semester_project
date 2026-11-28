@@ -25,25 +25,20 @@
 
 
 \input{sections/7_methodA}
+\input{sections/6_numerics}
 
 
 
 \input{sections/8_optimal_param}
 
-\section{Next step}
-\begin{itemize}
-    \item Numerics method A and B: phase diagram, overlap 2D, overlap 1D (transition)
-    \item Numerics: optimal param $\mu_R$ research for methode A (Eval Loss vs mu)
-    \item Numerics: Comparison of methods with Evaluation Loss
-    \item Simpliphy 
-    \item why B rank 2 and not 3, meme num peut etre
-    \item diagram phase matrice A uniquement 
-\end{itemize}
+\section{Conclusion}\label{sec:conclusion}
+We studied a naive spectral method and two EWC-inspired methods in the multi-task spiked Wigner model. The BBP transition extends to $k$ correlated spikes, which behave as $k$ independent spikes whose strengths are the eigenvalues of the signal matrix (Theorem~\ref{thm:bbp_k}). This gives the asymptotic overlaps of the naive method (Proposition~\ref{prop:naive}) and, through the spectrum of the Hessian of the EWC loss (Propositions~\ref{prop:spectrum_A} and~\ref{prop:phase_A}), those of Methods A and B (Propositions~\ref{prop:methodA} and~\ref{prop:B_overlaps}). Method A has a sharp recovery threshold: it recovers information on the signals if and only if $\lambda_2 > 1$ or $\mu_R > \mu_R^*$, so the EWC penalty alone can make the estimator leave the bulk. Method B has no such threshold, since its estimator also uses the bulk eigenvectors of the Hessian. Using these overlaps to tune the hyperparameters (Section~\ref{sec:optimal_param}), the sequential methods reach a test loss comparable to that of the naive method, which sees both tasks at the same time.
+
 \input{sections/name}
 
 \newpage
 
-\bibliographystyle{plain}
+\bibliographystyle{unsrt}
 \bibliography{references}
 
 

@@ -1,5 +1,7 @@
-\section{Naive method: results}\label{sec:naive}
-\subsection{Theoretical results}
+\section{Theoretical results}\label{sec:theory}
+We now derive the asymptotic performance of the three methods of Section~\ref{sec:methods}. All proofs are given in the appendices.
+
+\subsection{Naive method}\label{sec:naive}
 The observation of the naive method decomposes as
 \begin{equation}
     \rdmmat Y_{naive} := \alpha \rdmmat Y_1 + \sqrt{1-\alpha^2}\, \rdmmat Y_2
@@ -33,38 +35,3 @@ for $\theta_+ > 1$, and $m_1, m_2 \to 0$ for $\theta_+ \le 1$, with
 \noindent
 The assumption $0 < \rho < 1$ only excludes trivial cases: for $\rho = 0$ the two tasks decouple and $\vect v_+$ is $\vect x_1$ or $\vect x_2$, and for $\rho = 1$ the two signals coincide.
 The proof is given in Appendix~\ref{proof:naive}: $\rdmmat P$ is diagonalised in the plane of the signals, and Corollary~\ref{cor:overlap_signals} is applied to its top eigenvector $\vect v_+ = c_1^+\vect x_1 + c_2^+\vect x_2$. Recovery is possible if and only if $\theta_+ > 1$. Since $\theta_+ \ge \max(a, b)$, with equality only for $\rho = 0$, the correlation between the tasks lowers the recovery threshold of the combined observation.
-
-\subsection{Numerics}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\linewidth]{figures/eigenvalues_Y.png}
-    \caption{eigenvalues Y}
-    \label{fig:eigenvalues_Y}
-\end{figure}
-
-
-
-
-\begin{figure}[ht] 
-    \centering 
-    \hspace*{-1.3cm}
-   \begin{subfigure}{0.3\textwidth}
-        \includegraphics[width=\textwidth]{figures/phase_rho=0.3.png}
-                \caption{}
-
-    \end{subfigure}
-    \begin{subfigure}{0.7\textwidth}
-    \includegraphics[width=\textwidth]{figures/heat_a_rho.png}
-            \caption{}
-
-    \end{subfigure}
-  \caption{Recovery thershold}
-  \label{fig:overlap_naive}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.4\linewidth]{figures/overlaps_vs_lambda.png}
-    \caption{}
-    \label{fig:placeholder}
-\end{figure}

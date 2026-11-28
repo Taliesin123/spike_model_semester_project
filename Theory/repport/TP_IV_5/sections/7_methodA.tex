@@ -167,8 +167,8 @@ Details of the computation in \ref{true}.
 \end{comment}
 
 
-\section{Spectrum of the Hessian $\rdmmat A$}\label{sec:hessian_A}
-\subsection{First-step estimator}
+\subsection{Spectrum of the Hessian $\rdmmat A$}\label{sec:hessian_A}
+\subsubsection{First-step estimator}
 The first-step estimator $\hat{\vect x}^{(1)}$ is the top eigenvector of $\rdmmat Y_1 = \lambda_1 \vect x_1 \vect x_1 ^T + \rdmmat Z_1$. By Theorem~\ref{thm:bbp}, its overlap with $\vect x_1$ converges to
 \begin{equation}
     m_1 := \begin{cases}
@@ -184,7 +184,7 @@ To study the second step analytically, we replace $\hat{\vect x}^{(1)}$ by the u
 \end{equation}
 where $\vect x_3$ is a unit vector orthogonal to $\vect x_1$, independent of $\rdmmat Z_2$.
 
-\subsection{The matrix}
+\subsubsection{The matrix}
 We evaluate the Hessian at the projector estimator $\hat{\vect x}^{(1)}_{P_1}$ of Eq.~\eqref{eq:x_hat_p1}. Since $\norm{\hat{\vect x}^{(1)}_{P_1}} = 1$, the Fisher matrix of Appendix~\ref{adix:fisher} gives
 \begin{equation}
     \rdmmat A = \rdmmat Y_2 - \rdmmat I_n + 2\mu_R\,\rdmmat F\big(\hat{\vect x}^{(1)}_{P_1}\big)
@@ -196,7 +196,7 @@ We evaluate the Hessian at the projector estimator $\hat{\vect x}^{(1)}_{P_1}$ o
 \end{equation}
 This is the form $\rdmmat A = \rdmmat P + \rdmmat W + c\,\rdmmat I_n$ of Section~\ref{sec:model}, with $k=3$: in the orthonormal basis $\vect e_1 = \vect x_1$, $\vect e_2$, $\vect e_3 = \vect x_3$, $\rdmmat P = \rdmmat E \rdmmat B \rdmmat E^T$ with the coefficients of Table~\ref{tab:beta_A} in Appendix~\ref{tab:coefficients_beta_A(xP1)}. Its explicit form in the large $n$ limit is given in Eq.~\eqref{eq:B_A_limit}.
 
-\subsection{Eigenvalues and eigenvectors}
+\subsubsection{Eigenvalues and eigenvectors}
 \begin{prop}[Spectrum of $\rdmmat A$]\label{prop:spectrum_A}
 Let $m_1\rho > 0$. The eigenvalues $\theta_1\ge\theta_2\ge\theta_3$ of $\rdmmat B$ are
 \begin{equation}
@@ -248,7 +248,7 @@ $\rdmmat P$ is built from the two vectors $\hat{\vect x}^{(1)}_{P_1}$ and $\vect
 \noindent
 Since $\theta_3 = 0$, the third eigenvector belongs to the bulk and carries no information on the spikes: $\rdmmat A$ has at most two outliers. The eigenvectors and the overlaps do not depend on $c$, which only shifts the eigenvalues.
 
-\subsection{Transitions}\label{sec:transitions_A}
+\subsubsection{Transitions}\label{sec:transitions_A}
 By Eq.~\eqref{eq:outliers_A}, the number of outliers of $\rdmmat A$ is the number of $\theta_l > 1$. By Eq.~\eqref{eq:theta_A}, $\theta_1$ and $\theta_2$ are the roots of
 \begin{equation}
     p(\theta) = \theta^2 - (\Lambda + \lambda_2)\,\theta + \Lambda\lambda_2(1 - m_1^2\rho^2) ,
@@ -280,7 +280,7 @@ The proof is given in Appendix~\ref{adix:phase_A}. Since $f_{01} \le 1 \le f_{12
     \label{eq:Lambda_star}
 \end{equation}
 
-\section{Method A: top eigenvector of the Hessian}\label{sec:methodA}
+\subsection{Method A: top eigenvector of the Hessian}\label{sec:methodA}
 Method A takes as estimator the top eigenvector of $\rdmmat A$:
 \begin{equation}
     \hat{\vect x}^{(2)}_{A} = \text{top eigenvector}(\rdmmat A) = \vect u_1 .
@@ -326,7 +326,7 @@ Let $m_1\rho > 0$. Almost surely as $n\to\infty$:
 \noindent
 When the second signal is detectable on its own ($\lambda_2>1$), Method A always recovers information. Otherwise, the EWC penalty has to be strong enough to push $\theta_{max}$ above $1$: the regularisation alone can make the estimator leave the bulk. The overlaps have the same form as those of the naive method, Eq.~\eqref{eq:overlap_naive}, with $a \to \Lambda$, $b \to \lambda_2$ and $\rho \to m_1\rho$. Similarly, $m^A_3 = |\langle \hat{\vect x}^{(2)}_A, \vect{x_3}\rangle| \to \sqrt{1-m_1^2}\,|c_1^1|\sqrt{1-\theta_{max}^{-2}}$ measures the part of the first-step error inherited by the second-step estimator.
 
-\section{Method B: resolvent of the Hessian}\label{sec:methodB}
+\subsection{Method B: resolvent of the Hessian}\label{sec:methodB}
 Method B takes as estimator the solution of the stationarity condition with the Lagrange shift, Eq.~\eqref{eq:final_estimator_lagrange}:
 \begin{equation}
     \hat{\vect x}^{(2)}_B(\lambda) = 2\mu_R\,\vect R_{\rdmmat A}(\lambda)\,\vect F_1 \hat{\vect x}^{(1)},
@@ -378,7 +378,3 @@ so the pole part of Eq.~\eqref{eq:B_overlap} is the contribution of the outlier 
 
 \noindent
 \textbf{No sharp transition.} Unlike Method A, Method B has no recovery threshold. The left-hand side of Eq.~\eqref{eq:B_norm} diverges as $z \to z_*^+$ (through the pole $1-\theta_{\max}S_W = 0$ if $\theta_{\max} > 1$, through $-S_W' \to \infty$ as $z\to 2^+$ otherwise) and vanishes as $z\to\infty$, so a root always exists. Even for $\theta_{\max} \le 1$, Eq.~\eqref{eq:B_overlap} is non-zero as soon as $q_{il} q_{sl} \neq 0$: the estimator is then built from the bulk eigenvectors only, weighted by their overlap with $\hat{\vect x}^{(1)}$, and keeps information on $\vect x_1$, and on $\vect x_2$ through the correlation $\rho$.
-
-
-
-\newpage
